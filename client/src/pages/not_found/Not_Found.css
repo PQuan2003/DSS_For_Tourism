@@ -1,0 +1,48 @@
+.not-found-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: hsla(0, 0%, 100%, 0.877); 
+    font-family: sans-serif;
+    color: hsla(0, 0%, 20%, 0.89);
+}
+
+.error-code {
+    font-size: 8em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    letter-spacing: -5px;
+}
+
+.error-message {
+    font-size: 2em;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.explanation {
+    font-size: 1.5em;
+    color: hsl(0, 0%, 47%);
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 0 20px;
+    line-height: 1.5;
+    max-width: 700px;
+}
+
+.error-back-to-home {
+    font-size: 1.3em;
+    border: 3px solid black;
+    border-radius: 5px;
+    padding: 10px;
+    transition: background-color 0.3s ease, color 0.2s ease;
+    text-decoration: none;
+}
+
+.error-back-to-home:hover {
+    background-color: hsla(180, 100%, 50%, 0.795);
+    color: hsl(0, 0%, 0%)
+}
+  
