@@ -10,9 +10,10 @@ function Home() {
 
         >
             <NavBar />
+            <h1>Home Page</h1>
             <div className="home-body"
                 style={{
-                    backgroundImage: `url(${bgImage})`,
+                    // backgroundImage: `url(${bgImage})`,
                     backgroundPosition: 'center',
                     backgroundSize: 'cover',
                     backgroundRepeat: 'no-repeat',
