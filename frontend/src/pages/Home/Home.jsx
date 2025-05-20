@@ -1,6 +1,5 @@
 import './style_Home.css'
 import { Link } from "react-router-dom";
-import bgImage from '../../../public/sand.jpg'
 import NavBar from "../../components/NavBar/NavBar";
 
 function Home() {
@@ -13,7 +12,6 @@ function Home() {
             <h1>Home Page</h1>
             <div className="home-body"
                 style={{
-                    // backgroundImage: `url(${bgImage})`,
                     backgroundPosition: 'center',
                     backgroundSize: 'cover',
                     backgroundRepeat: 'no-repeat',
@@ -23,7 +21,7 @@ function Home() {
             >
                 <h1>Explore Your Dream Destinations</h1>
                 <h3>Sth sth sth sth sth</h3>
-                <Link to='/'>Start finding</Link>
+                {/* <Link to='/form'>Start finding</Link> */}
             </div >
         </div >
     )
