@@ -1,2 +1,4 @@
-server/.env
-client/front_end/note
+backend/.env
+backend/node_modules
+
+frontend/front_end/note
