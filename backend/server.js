@@ -2,40 +2,41 @@ const express = require("express");
 const dotenv = require("dotenv");
 const mysql2 = require("mysql2");
 const cors = require("cors");
+
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT;
+
 app.use(cors());
+app.use(express.json()); // ✅ Parse JSON bodies
 
 const db = require("./models");
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err);
+  console.error("Serever Error", err);
   res.status(500).send("Server-side error");
 });
 
 // Synchronize Sequelize models with the database and then start the Express server
-db.sequelize
-  .authenticate()
-  .then(() => {
+const startServer = async () => {
+  try {
+    await db.sequelize.authenticate();
+
     console.log("Database connection has been established successfully.");
     // db.sequelize.sync({ alter: true }) // Use { alter: true } in development to update tables
-    db.sequelize
-      .sync({ alter: true })
-      .then(() => {
-        console.log("Database synced!");
-        app.listen(PORT, () => {
-          console.log(`Server is running on port ${PORT}`);
-        });
-      })
-      .catch((syncErr) => {
-        console.error("Unable to sync database:", syncErr);
-        process.exit(1); // Exit process if database sync fails
-      });
-  })
-  .catch((authErr) => {
-    console.error("Unable to connect to the database:", authErr);
-    process.exit(1);
-  });
+    await db.sequelize.sync({ alter: true });
+    console.log("Database synced!");
+
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Error starting server:", error);
+    process.exit(1); // Exit process if server fails to start
+  }
+};
+
+startServer();
+module.exports = app;
