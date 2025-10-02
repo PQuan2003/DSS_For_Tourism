@@ -11,6 +11,9 @@ const PORT = process.env.PORT;
 app.use(cors());
 app.use(express.json()); // ✅ Parse JSON bodies
 
+const routes = require("./routes");
+app.use("/", routes);
+
 const db = require("./models");
 
 // Error handling middleware
@@ -19,6 +22,12 @@ app.use((err, req, res, next) => {
   res.status(500).send("Server-side error");
 });
 
+// Debug logger middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next();
+});
+  
 // Synchronize Sequelize models with the database and then start the Express server
 const startServer = async () => {
   try {
@@ -26,7 +35,7 @@ const startServer = async () => {
 
     console.log("Database connection has been established successfully.");
     // db.sequelize.sync({ alter: true }) // Use { alter: true } in development to update tables
-    await db.sequelize.sync({ alter: true });
+    await db.sequelize.sync({ force: false });
     console.log("Database synced!");
 
     app.listen(PORT, () => {
