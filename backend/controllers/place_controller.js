@@ -25,7 +25,7 @@ exports.getPlaceById = async (req, res, next) => {
     const place = await Place.findByPk(req.params.id);
     res.json({
       status: "success",
-      content: place? place : "Place not found",
+      content: place ? place : "Place not found",
     });
   } catch (err) {
     console.error("Error fetching places:", err);
@@ -37,40 +37,94 @@ exports.getPlaceById = async (req, res, next) => {
   }
 };
 
-// Create place
-// exports.createPlace = async (req, res, next) => {
-//   try {
-//     const place = await Place.create(req.body);
-//     res.status(201).json(place);
-//   } catch (err) {
-//     next(err);
-//   }
-// };
+exports.calculatedAllPlaceBudgetPoint = async (req, res, next) => {
+  try {
+    let { userBudget, totalTravelDays } = req.body;
 
-// // Update place
-// exports.updatePlace = async (req, res, next) => {
-//   try {
-//     const [updated] = await Place.update(req.body, {
-//       where: { place_id: req.params.id },
-//     });
-//     if (!updated) return res.status(404).json({ error: "Place not found" });
+    // Handle missing parameters
+    userBudget = Number(userBudget) || 0;
+    totalTravelDays = Number(totalTravelDays) || 0;
 
-//     const updatedPlace = await Place.findByPk(req.params.id);
-//     res.json(updatedPlace);
-//   } catch (err) {
-//     next(err);
-//   }
-// };
+    const places = await Place.findAll();
 
-// // Delete place
-// exports.deletePlace = async (req, res, next) => {
-//   try {
-//     const deleted = await Place.destroy({
-//       where: { place_id: req.params.id },
-//     });
-//     if (!deleted) return res.status(404).json({ error: "Place not found" });
-//     res.json({ message: "Place deleted" });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
+    const scorings = places.map((place) => {
+      const { score, totalBudgetNeeded } = place.calculatedBudgetPoint(
+        userBudget,
+        totalTravelDays
+      );
+
+      return {
+        place_name: place.place_name,
+        score: score || -1,
+        totalBudgetNeeded: totalBudgetNeeded || -1,
+        money_unit: place.money_unit,
+      };
+    });
+
+    // Sort highest → lowest
+    scorings.sort((a, b) => b.score - a.score);
+
+    res.json({
+      status: "success",
+      content: scorings,
+    });
+  } catch (err) {
+    console.error("Error calculating budget scores:", err);
+    res.status(500).json({
+      status: "failed",
+      content: err.message || "Something went wrong",
+    });
+  }
+};
+
+exports.calculateIndividualPlaceBudgetScore = async (req, res, next) => {
+  try {
+    const { place_id } = req.params;
+
+    if (!place_id) {
+      return res.status(400).json({
+        status: "failed",
+        content: "place_id is required in params",
+      });
+    }
+
+    let { userBudget, totalTravelDays } = req.body;
+
+    // handle missing parameters
+    userBudget = Number(userBudget) || 0;
+    totalTravelDays = Number(totalTravelDays) || 0;
+
+    // Find place by ID
+    const place = await Place.findByPk(place_id);
+
+    if (!place) {
+      return res.status(404).json({
+        status: "failed",
+        content: `Place with id ${place_id} not found`,
+      });
+    }
+
+    const { score, totalBudgetNeeded } = place.calculatedBudgetPoint(
+      userBudget,
+      totalTravelDays
+    );
+
+    console.log(score, totalBudgetNeeded);
+
+    res.json({
+      status: "success",
+      content: {
+        place_name: place.place_name,
+        score: score || -1,
+        totalBudgetNeeded: totalBudgetNeeded || -1,
+        moeny_unit: place.money_unit,
+      },
+    });
+  } catch (err) {
+    console.error("Error calculating budget scores:", err);
+    res.status(500).json({
+      status: "failed",
+      content: err.message || "Something went wrong",
+    });
+  }
+};

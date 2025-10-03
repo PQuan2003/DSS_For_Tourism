@@ -9,7 +9,8 @@ const app = express();
 const PORT = process.env.PORT;
 
 app.use(cors());
-app.use(express.json()); // ✅ Parse JSON bodies
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true }));
 
 const routes = require("./routes");
 app.use("/", routes);
@@ -27,7 +28,7 @@ app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
   next();
 });
-  
+
 // Synchronize Sequelize models with the database and then start the Express server
 const startServer = async () => {
   try {

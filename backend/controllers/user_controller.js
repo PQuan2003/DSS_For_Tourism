@@ -33,8 +33,20 @@ exports.getUserById = async (req, res, next) => {
 // Create user
 exports.createUser = async (req, res, next) => {
   try {
-    const user = await User.create(req.body);
-    res.status(201).json(user);
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res
+        .status(400)
+        .json({ error: "Username and password are required" });
+    }
+
+    const user = await User.create(username, hashed_password);
+    // Strip hashed_password before sending response
+    const { hashed_password, ...userSafe } = user.get({ plain: true });
+
+    res
+      .status(201)
+      .json({ message: "User created successfully", user: userSafe });
   } catch (err) {
     next(err);
   }
