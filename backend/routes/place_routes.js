@@ -6,10 +6,18 @@ const placeController = require("../controllers/place_controller");
 router.get("/", placeController.getAllPlaces);
 router.get("/:id", placeController.getPlaceById);
 
+//Budget Score
 router.post("/budget/score/", placeController.calculatedAllPlaceBudgetPoint);
 router.post(
   "/budget/score/:place_id",
   placeController.calculateIndividualPlaceBudgetScore
+);
+
+//Scenery Score
+router.post("/scenery/score/", placeController.calculatedAllPlaceSceneryPoint);
+router.post(
+  "/scenery/score/:place_id",
+  placeController.calculateIndividualPlaceSceneryScore
 );
 
 // router.post("/", placeController.createPlace);

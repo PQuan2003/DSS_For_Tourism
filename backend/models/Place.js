@@ -56,6 +56,56 @@ module.exports = (sequelize, DataTypes) => {
         totalBudgetNeeded,
       };
     }
+
+    calculatedSceneryPoint(user_scenery_preferences) {
+      if (
+        !Array.isArray(user_scenery_preferences) ||
+        user_scenery_preferences.length === 0
+      ) {
+        return 0.5;
+      }
+      const bias = 0.15; // increase per extra match after first
+      let placeTags = this.getDataValue("tags");
+      if (!placeTags) {
+        placeTags = [];
+      } else if (typeof placeTags === "string") {
+        try {
+          console.log("Defensive fallback run");
+          placeTags = JSON.parse(placeTags);
+        } catch (e) {
+          placeTags = placeTags
+            .replace(/[\[\]']/g, "") // remove [ ] and single quotes
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean);
+        }
+      }
+
+      if (!Array.isArray(placeTags)) placeTags = [];
+
+      // normalize to lowercase
+      const userPrefsLower = user_scenery_preferences.map((p) =>
+        String(p).toLowerCase().trim()
+      );
+      const tagsLower = placeTags.map((t) => String(t).toLowerCase().trim());
+
+      // count unique matches (so duplicates in either list don't inflate score)
+      const matchedSet = new Set();
+      for (const pref of userPrefsLower) {
+        if (tagsLower.includes(pref)) matchedSet.add(pref);
+      }
+      const matchesCount = matchedSet.size;
+      if (matchesCount === 0) return 0; // no match = 0
+      if (matchesCount === 1) return 0.5; // one match = 0.5
+
+      // Additional matches increase score by bias
+      let score = 0.5 + bias * (matchesCount - 1);
+
+      // Cap at 1.0
+      if (score > 1) score = 1;
+
+      return Number(score.toFixed(2));
+    }
   }
 
   Place.init(
@@ -71,7 +121,36 @@ module.exports = (sequelize, DataTypes) => {
       avg_cost_per_day: DataTypes.FLOAT,
       place_description: DataTypes.TEXT,
       place_img: DataTypes.STRING,
-      tags: DataTypes.STRING,
+      // tags: DataTypes.STRING,
+      tags: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        // getter: return an array always
+        get() {
+          const raw = this.getDataValue("tags");
+          if (!raw) return [];
+          if (Array.isArray(raw)) return raw;
+          try {
+            return JSON.parse(raw);
+          } catch {
+            // fallback for weird string format
+            return String(raw)
+              .replace(/[\[\]']/g, "")
+              .split(",")
+              .map((t) => t.trim())
+              .filter(Boolean);
+          }
+        },
+        // setter: accept arrays and strings; store array directly for JSON column
+        set(val) {
+          if (Array.isArray(val)) {
+            this.setDataValue("tags", val);
+          } else {
+            // leave as-is (Sequelize will stringify when storing in JSON column)
+            this.setDataValue("tags", val);
+          }
+        },
+      },
       tourist_density: DataTypes.STRING,
     },
     {
