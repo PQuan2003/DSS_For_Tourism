@@ -20,6 +20,16 @@ router.post(
   placeController.calculateIndividualPlaceSceneryScore
 );
 
+//Activity Score
+router.post(
+  "/activity/score/",
+  placeController.calculatedAllPlaceActivityPoint
+);
+router.post(
+  "/activity/score/:place_id",
+  placeController.calculateIndividualPlaceActivityScore
+);
+
 // router.post("/", placeController.createPlace);
 // router.put("/:id", placeController.updatePlace);
 // router.delete("/:id", placeController.deletePlace);

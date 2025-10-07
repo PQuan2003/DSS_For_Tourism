@@ -58,19 +58,19 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     calculatedSceneryPoint(user_scenery_preferences) {
+      //Default value when the user doesnt set their scenery preferences
       if (
         !Array.isArray(user_scenery_preferences) ||
         user_scenery_preferences.length === 0
       ) {
         return 0.5;
       }
-      const bias = 0.15; // increase per extra match after first
+
       let placeTags = this.getDataValue("tags");
       if (!placeTags) {
         placeTags = [];
       } else if (typeof placeTags === "string") {
         try {
-          console.log("Defensive fallback run");
           placeTags = JSON.parse(placeTags);
         } catch (e) {
           placeTags = placeTags
@@ -83,7 +83,7 @@ module.exports = (sequelize, DataTypes) => {
 
       if (!Array.isArray(placeTags)) placeTags = [];
 
-      // normalize to lowercase
+      // normalize
       const userPrefsLower = user_scenery_preferences.map((p) =>
         String(p).toLowerCase().trim()
       );
@@ -94,17 +94,86 @@ module.exports = (sequelize, DataTypes) => {
       for (const pref of userPrefsLower) {
         if (tagsLower.includes(pref)) matchedSet.add(pref);
       }
+
       const matchesCount = matchedSet.size;
       if (matchesCount === 0) return 0; // no match = 0
       if (matchesCount === 1) return 0.5; // one match = 0.5
 
-      // Additional matches increase score by bias
+      const bias = 0.1;
+      // additional matches add bias
       let score = 0.5 + bias * (matchesCount - 1);
 
-      // Cap at 1.0
+      // cap at 1
       if (score > 1) score = 1;
 
-      return Number(score.toFixed(2));
+      return Number(score.toFixed(3));
+    }
+
+    async calculatedActivityPoint(user_activity_preference) {
+      if (
+        !Array.isArray(user_activity_preference) ||
+        user_activity_preference.length === 0
+      ) {
+        // console.log("Default option choosen", user_activity_preference);
+        return 0.5;
+      }
+
+      // console.log("Running activity normally");
+      const prefsLower = user_activity_preference.map((a) =>
+        String(a).toLowerCase().trim()
+      );
+
+      const pois = await sequelize.models.POI.findAll({
+        where: { place_id: this.place_id },
+        include: [
+          {
+            model: sequelize.models.POI_Activity,
+            include: [
+              {
+                model: sequelize.models.Activity,
+                attributes: ["activity_name"],
+              },
+            ],
+          },
+        ],
+      });
+
+      // console.log("Found POI", pois);
+
+      const allActivityNames = pois.flatMap(
+        (poi) =>
+          poi.POI_Activities?.map((pa) =>
+            pa.Activity?.activity_name?.toLowerCase().trim()
+          ) || []
+      );
+
+      const matchedSet = new Set();
+      for (const pref of prefsLower) {
+        if (allActivityNames.includes(pref)) matchedSet.add(pref);
+      }
+
+      const matchesCount = matchedSet.size;
+
+      if (matchesCount === 0)
+        return {
+          score: 0,
+          place_activity_tags: allActivityNames,
+        };
+      if (matchesCount === 1)
+        return {
+          score: 0.5,
+          place_activity_tags: allActivityNames,
+        };
+
+      const bias = 0.1;
+      let score = 0.5 + bias * (matchesCount - 1);
+
+      if (score > 1) score = 1;
+
+      return {
+        score: Number(score.toFixed(2)),
+        place_activity_tags: allActivityNames,
+      };
     }
   }
 

@@ -182,10 +182,6 @@ exports.calculateIndividualPlaceSceneryScore = async (req, res) => {
       console.log("Empty Scenery Req");
       user_preference = {};
     }
-    console.log(
-      "Requireeeeeeeeeeeeeeeeee",
-      user_preference.user_scenery_requirement
-    );
     const place = await Place.findByPk(place_id);
 
     if (!place) {
@@ -205,6 +201,92 @@ exports.calculateIndividualPlaceSceneryScore = async (req, res) => {
       place_name: place.place_name,
       tags: place.tags,
       score,
+    });
+  } catch (err) {
+    console.log("Error calculating scenery scores", err);
+    res.status(500).json({
+      status: "failed",
+      content: err.message || "Something went wrong",
+    });
+  }
+};
+
+exports.calculatedAllPlaceActivityPoint = async (req, res) => {
+  try {
+    let user_preference = req.body;
+
+    if (!user_preference) {
+      user_preference = {};
+    }
+
+    const places = await Place.findAll();
+
+    const scorings = await Promise.all(
+      places.map(async (place) => {
+        const { score, place_activity_tags } =
+          await place.calculatedActivityPoint(
+            user_preference.user_activity_requirement
+          );
+
+        return {
+          place_id: place.place_id,
+          place_name: place.place_name,
+          score,
+          place_activity_tags,
+        };
+      })
+    );
+
+    scorings.sort((a, b) => b.score - a.score);
+
+    res.json({
+      status: "success",
+      content: scorings,
+    });
+  } catch (err) {
+    console.log("Error calculating scenery scores", err);
+    res.status(500).json({
+      status: "failed",
+      content: err.message || "Something went wrong",
+    });
+  }
+};
+
+exports.calculateIndividualPlaceActivityScore = async (req, res) => {
+  try {
+    let { place_id } = req.params;
+
+    if (!place_id) {
+      return res.status(400).json({
+        status: "failed",
+        content: "place_id is required in params",
+      });
+    }
+
+    let user_preference = req.body;
+    if (!user_preference) {
+      console.log("Empty Scenery Req");
+      user_preference = {};
+    }
+    const place = await Place.findByPk(place_id);
+
+    if (!place) {
+      return res.status(404).json({
+        status: "failed",
+        content: `Place with id ${place_id} not found`,
+      });
+    }
+
+    const { score, place_activity_tags } = await place.calculatedActivityPoint(
+      user_preference.user_activity_requirement
+    );
+
+    res.json({
+      status: "success",
+      place_id: place.place_id,
+      place_name: place.place_name,
+      score,
+      place_activity_tags,
     });
   } catch (err) {
     console.log("Error calculating scenery scores", err);
