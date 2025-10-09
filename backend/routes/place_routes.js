@@ -30,6 +30,12 @@ router.post(
   placeController.calculateIndividualPlaceActivityScore
 );
 
+router.post("/weather/score/", placeController.calculatedAllPlaceWeatherPoint);
+router.post(
+  "/weather/score/:place_id",
+  placeController.calculateIndividualPlaceWeatherScore
+);
+
 // router.post("/", placeController.createPlace);
 // router.put("/:id", placeController.updatePlace);
 // router.delete("/:id", placeController.deletePlace);

@@ -147,6 +147,8 @@ module.exports = (sequelize, DataTypes) => {
           ) || []
       );
 
+      // console.log("Tagggggggggggg", allActivityNames);
+
       const matchedSet = new Set();
       for (const pref of prefsLower) {
         if (allActivityNames.includes(pref)) matchedSet.add(pref);
@@ -173,6 +175,54 @@ module.exports = (sequelize, DataTypes) => {
       return {
         score: Number(score.toFixed(2)),
         place_activity_tags: allActivityNames,
+      };
+    }
+
+    async calculatedWeatherPoint(user_weather_preference, travel_month) {
+      if (!user_weather_preference || !travel_month)
+        return { score: 0.5, weather_data: null };
+
+      const weather = await sequelize.models.Weather_Conditions.findOne({
+        where: {
+          place_id: this.place_id,
+          month: travel_month,
+        },
+      });
+
+      if (!weather) return { score: 0, weather_data: null };
+
+      // --- Normalize and calculate ---
+      const { avg_temp, humidity, weather_type } = user_weather_preference;
+
+      let tempScore = 0.5;
+      if (avg_temp !== undefined && avg_temp !== null) {
+        const tempDiff = Math.abs(weather.avg_temp - avg_temp);
+        tempScore = Math.max(0, 1 - tempDiff / 20); // within 20°C range
+      }
+
+      let humidityScore = 0.5;
+      if (humidity !== undefined && humidity !== null) {
+        const humDiff = Math.abs(weather.humidity - humidity);
+        humidityScore = Math.max(0, 1 - humDiff / 50); // within 50% humidity range
+      }
+
+      let typeScore = 0.5;
+      if (weather_type) {
+        const weatherTypeLower = weather.weather_type?.toLowerCase().trim();
+        const userTypeLower = weather_type.toLowerCase().trim();
+        typeScore = weatherTypeLower === userTypeLower ? 1 : 0;
+      }
+
+      const totalScore = (tempScore + humidityScore + typeScore) / 3;
+
+      return {
+        score: Number(totalScore.toFixed(3)),
+        weather_data: {
+          month: weather.month,
+          avg_temp: weather.avg_temp,
+          humidity: weather.humidity,
+          weather_type: weather.weather_type,
+        },
       };
     }
   }
@@ -232,3 +282,19 @@ module.exports = (sequelize, DataTypes) => {
 
   return Place;
 };
+
+/*Note: 
+      structure:
+      user_weather_preference = {
+        avg_temp: 17,
+        humidity: 50,
+        weather_type: "Sunny"
+      }
+      travel_month = "Feb"
+      
+      score là avg của cả 3 category
+      giả sử 1 trong 3 thiếu / ng dùng k điền thì cho default = 0.5
+
+      json trả về: gồm điểm + 3 giá trị trên để tiện debug
+      
+*/

@@ -296,3 +296,109 @@ exports.calculateIndividualPlaceActivityScore = async (req, res) => {
     });
   }
 };
+
+exports.calculatedAllPlaceWeatherPoint = async (req, res) => {
+  try {
+    let user_preference = req.body;
+    if (!user_preference) {
+      console.log("Empty User Req");
+      user_preference = {};
+    }
+
+    if (
+      user_preference.travel_month === undefined ||
+      user_preference.travel_month === null
+    ) {
+      return res.status(400).json({
+        status: "failed",
+        content: "travel_month is required in body",
+      });
+    }
+
+    const places = await Place.findAll();
+
+    const scorings = await Promise.all(
+      places.map(async (place) => {
+        const { score, weather_data } = await place.calculatedWeatherPoint(
+          user_preference.user_weather_preference,
+          user_preference.travel_month
+        );
+
+        return {
+          place_id: place.place_id,
+          place_name: place.place_name,
+          score,
+          weather_data,
+        };
+      })
+    );
+
+    scorings.sort((a, b) => b.score - a.score);
+
+    res.json({
+      status: "success",
+      content: scorings,
+    });
+  } catch (err) {
+    console.log("Error calculating weather scores", err);
+    res.status(500).json({
+      status: "failed",
+      content: err.message || "Something went wrong",
+    });
+  }
+};
+
+exports.calculateIndividualPlaceWeatherScore = async (req, res) => {
+  try {
+    let { place_id } = req.params;
+    if (!place_id) {
+      return res.status(400).json({
+        status: "failed",
+        content: "place_id is required in params",
+      });
+    }
+
+    let user_preference = req.body;
+    if (!user_preference) {
+      console.log("Empty User Req");
+      user_preference = {};
+    }
+
+    if (
+      user_preference.travel_month === undefined ||
+      user_preference.travel_month === null
+    ) {
+      return res.status(400).json({
+        status: "failed",
+        content: "travel_month is required in body",
+      });
+    }
+
+    const place = await Place.findByPk(place_id);
+
+    if (!place) {
+      return res.status(404).json({
+        status: "failed",
+        content: `Place with id ${place_id} not found`,
+      });
+    }
+
+    const { score, weather_data } = await place.calculatedWeatherPoint(
+      user_preference.user_weather_preference,
+      user_preference.travel_month
+    );
+
+    res.json({
+      status: "success",
+      place_name: place.place_name,
+      score,
+      weather_data,
+    });
+  } catch (err) {
+    console.log("Error calculating weather scores", err);
+    res.status(500).json({
+      status: "failed",
+      content: err.message || "Something went wrong",
+    });
+  }
+};
