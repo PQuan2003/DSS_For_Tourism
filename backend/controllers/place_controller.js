@@ -109,7 +109,7 @@ exports.calculateIndividualPlaceBudgetScore = async (req, res, next) => {
       totalTravelDays
     );
 
-    console.log(score, totalBudgetNeeded);
+    // console.log(score, totalBudgetNeeded);
 
     res.json({
       status: "success",
@@ -339,6 +339,7 @@ exports.calculatedAllPlaceWeatherPoint = async (req, res) => {
       status: "success",
       content: scorings,
     });
+    console.log("finished calculating all weather point");
   } catch (err) {
     console.log("Error calculating weather scores", err);
     res.status(500).json({

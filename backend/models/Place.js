@@ -52,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
         score = Math.max(0, score - bias); // penalty for over-budget
       }
       return {
-        score: Math.max(0, Math.min(1, score)),
+        score: Number(Math.max(0, Math.min(1, score)).toFixed(3)),
         totalBudgetNeeded,
       };
     }

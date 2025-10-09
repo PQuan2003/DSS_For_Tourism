@@ -6,6 +6,8 @@ const ResultLController = require("../controllers/result_controller");
 router.get("/", ResultLController.getAllResult);
 router.get("/:id", ResultLController.getResultById);
 
+router.post("/new", ResultLController.createNewResult);
+
 // router.post("/", ResultLController.createPlace);
 // router.put("/:id", ResultLController.updatePlace);
 // router.delete("/:id", ResultLController.deletePlace);
