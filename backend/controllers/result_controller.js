@@ -39,53 +39,17 @@ exports.getResultById = async (req, res, next) => {
 
 exports.createNewResult = async (req, res) => {
   try {
-    // const [budget_point, scenery_point, activity_point, weather_point] =
-    //   await Promise.all([
-    //     placeController.calculatedAllPlaceBudgetPoint(req, res),
-    //     placeController.calculatedAllPlaceSceneryPoint(req, res),
-    //     placeController.calculatedAllPlaceActivityPoint(req, res),
-    //     placeController.calculatedAllPlaceWeatherPoint(req, res),
-    //   ]);
-
-    // const combinedResults = combine_all_score(
-    //   budget_point,
-    //   scenery_point,
-    //   activity_point,
-    //   weather_point
-    // );
-
     let {
-      userBudget,
-      totalTravelDays,
-      user_scenery_requirement,
-      user_activity_preference,
-      user_weather_preference,
+      userBudget = 0,
+      totalTravelDays = 0,
+      user_scenery_requirement = [],
+      user_activity_preference = [],
+      user_weather_preference = {},
       travel_month,
-    } = req.body;
+    } = req.body || {};
 
     userBudget = Number(userBudget) || 0;
     totalTravelDays = Number(totalTravelDays) || 0;
-
-    if (
-      user_scenery_requirement === undefined ||
-      user_scenery_requirement === null
-    ) {
-      user_scenery_requirement = [];
-    }
-
-    if (
-      user_activity_preference === undefined ||
-      user_activity_preference === null
-    ) {
-      user_activity_preference = [];
-    }
-
-    if (
-      user_weather_preference === undefined ||
-      user_weather_preference === null
-    ) {
-      user_weather_preference = [];
-    }
 
     if (
       (travel_month === undefined || travel_month === null) &&
@@ -158,5 +122,3 @@ exports.createNewResult = async (req, res) => {
     });
   }
 };
-
-//20 so dau, call lai ai de lay avg

@@ -11,16 +11,15 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     calculatedBudgetPoint(userBudget, totalTravelDays) {
-      // console.log("This function is runningggggg");
       const tolerance = 0.1; // 10% tolerance
       const underTolerance = 0.5; // 50% tolerance before making the place have full score
       const bias = 0.05; // 5% advantage for under-budget
 
       let score = 0;
-      // If user doesnt have either parameter in the request => use 0.75 for all places as default
+      // If user doesnt have either parameter in the request => use 0.5 for all places as default
       if (userBudget <= 0 || totalTravelDays <= 0)
         return {
-          score: 0.75,
+          score: 0.5,
           totalBudgetNeeded: -1,
         };
 
@@ -30,26 +29,32 @@ module.exports = (sequelize, DataTypes) => {
 
       const percentageDiff = difference / totalBudgetNeeded;
 
+      //over budget and out of tolerance
       if (userBudget < totalBudgetNeeded && percentageDiff > tolerance) {
-        if (userBudget <= 0 || totalTravelDays <= 0)
-          return {
-            score: 0,
-            totalBudgetNeeded,
-          };
+        return {
+          score: 0,
+          totalBudgetNeeded,
+        };
       }
 
       if (userBudget < totalBudgetNeeded) {
-        score = 0.75 * (1 - percentageDiff / tolerance);
+        // Over budget but within tolerance
+        const ratio = percentageDiff / tolerance;
+        score = 0.5 * (1 - ratio ** 2); // curve downward smoothly
+        score = Math.max(0, score - bias * 0.5);
       } else {
         if (percentageDiff > underTolerance) {
+          // Way under budget → max score
           return {
             score: 1,
             totalBudgetNeeded,
           };
         }
 
-        score = 0.75 + 0.25 * (percentageDiff / tolerance);
-        score = Math.max(0, score - bias); // penalty for over-budget
+        // Under budget with smaller difference
+        const ratio = percentageDiff / underTolerance;
+        score = 0.5 + 0.5 * ratio ** 0.5; // sqrt curve - not linear, reward better score for being further under budget
+        score = Math.min(score, 1);
       }
       return {
         score: Number(Math.max(0, Math.min(1, score)).toFixed(3)),
@@ -106,6 +111,7 @@ module.exports = (sequelize, DataTypes) => {
       // cap at 1
       if (score > 1) score = 1;
 
+
       return Number(score.toFixed(3));
     }
 
@@ -138,7 +144,6 @@ module.exports = (sequelize, DataTypes) => {
         ],
       });
 
-      // console.log("Found POI", pois);
 
       const allActivityNames = pois.flatMap(
         (poi) =>
@@ -146,8 +151,6 @@ module.exports = (sequelize, DataTypes) => {
             pa.Activity?.activity_name?.toLowerCase().trim()
           ) || []
       );
-
-      // console.log("Tagggggggggggg", allActivityNames);
 
       const matchedSet = new Set();
       for (const pref of prefsLower) {
@@ -179,31 +182,29 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     async calculatedWeatherPoint(user_weather_preference, travel_month) {
-      if (!user_weather_preference || !travel_month)
-        return { score: 0.5, weather_data: null };
+      if (!user_weather_preference) return { score: 0.5, weather_data: null };
 
       const weather = await sequelize.models.Weather_Conditions.findOne({
         where: {
           place_id: this.place_id,
-          month: travel_month,
+          month: travel_month,  
         },
       });
 
       if (!weather) return { score: 0, weather_data: null };
 
-      // --- Normalize and calculate ---
       const { avg_temp, humidity, weather_type } = user_weather_preference;
 
       let tempScore = 0.5;
       if (avg_temp !== undefined && avg_temp !== null) {
         const tempDiff = Math.abs(weather.avg_temp - avg_temp);
-        tempScore = Math.max(0, 1 - tempDiff / 20); // within 20°C range
+        tempScore = Math.max(0, 1 - tempDiff / 20); // Max 20°C tolerance
       }
 
       let humidityScore = 0.5;
       if (humidity !== undefined && humidity !== null) {
         const humDiff = Math.abs(weather.humidity - humidity);
-        humidityScore = Math.max(0, 1 - humDiff / 50); // within 50% humidity range
+        humidityScore = Math.max(0, 1 - humDiff / 50); // 50% tolerance
       }
 
       let typeScore = 0.5;
@@ -298,3 +299,14 @@ module.exports = (sequelize, DataTypes) => {
       json trả về: gồm điểm + 3 giá trị trên để tiện debug
       
 */
+
+
+
+      //in testing
+      /* 
+      const bias = 0.1;
+      const normalized = Math.min(1, (matchesCount - 1) / 5); // 5 or more matches = full score
+      const curve = normalized ** 0.5; // non-linear curve for score increase
+      let score = 0.5 + 0.5 * curve; // ranges smoothly 0.5–1
+      score = Math.min(score, 1); 
+       */
