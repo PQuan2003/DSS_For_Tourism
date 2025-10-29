@@ -1,4 +1,6 @@
-@import url(https://fonts.googleapis.com/css2?family=Lato&display=swap);
+@import "tailwindcss";
+
+/* @import url(https://fonts.googleapis.com/css2?family=Lato&display=swap);
 @import url(https://fonts.googleapis.com/css2?family=Open+Sans&display=swap);
 @import url(https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200);
 
@@ -237,4 +239,4 @@ video {
     --tw-contain-layout: ;
     --tw-contain-paint: ;
     --tw-contain-style: ;
-}
+} */

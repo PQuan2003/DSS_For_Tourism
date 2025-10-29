@@ -1,0 +1,23 @@
+- Point Base for Budget with Normalization ✅
+- Point Base for Budget with Scenery ✅
+- Point Base for Budget with Activities (Gọi POI ra, và POI Activity để kiếm / có thể lm theo kiểu theo set) ✅
+- Point Base for Budget with Weather (gộp chung nhiệt độ + lượng mưa vô) ✅
+- Point Base for Tourist Density 
+
+1 route chung để tính điểm toàn place ✅
+
+chỉnh lại tags trong place db -> chỉ nhận tag mô tả scenery
+*** Ket hop UI front + back (siu quan trọng) (
+    chỉnh lại frontend form design cho hợp vs paramter - coi postman
+    hiện result = popup/quan trang mới   
+)
+
+
+//Other function
+backend để search từng place
+frontend hiện trang search (Từng place là card vs tên + nước -> nhấn vô sẽ popup trang bự/đẩy qua trang khác ghi đủ thông tin)
+
+hỏi "bạn thân" xem có cần thêm chức năng gì nữa k
+
+//Optional - Khó hơn
+- (Sau cai tren) See how to apply AHP to list for each parameter first
