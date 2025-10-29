@@ -3,28 +3,17 @@ import { useNavigate } from "react-router-dom";
 import SearchableMultiSelect from "./SearchableMultiSelect";
 
 function UserForm() {
-    const navigate = useNavigate();
+    const navigate = useNavigate()
 
     const [budget, setBudget] = useState(5000000);
-    const [travelMonth, setTravelMonth] = useState("");
     const [avgTemp, setAvgTemp] = useState("");
     const [humidity, setHumidity] = useState("");
     const [weatherType, setWeatherType] = useState("");
-    const [totalDays, setTotalDays] = useState("");
-
     const [showTravelDays, setShowTravelDays] = useState(false);
-
+    const [totalDays, setTotalDays] = useState("");
 
     const [scenery, setScenery] = useState([]);
     const [activities, setActivities] = useState([]);
-
-    const [showOptional, setShowOptional] = useState(false);
-    const [weights, setWeights] = useState({
-        budget: 3,
-        scenery: 3,
-        activity: 3,
-        weather: 3,
-    });
 
     const handleWeatherChange = (field, value) => {
         if (field === "temp") setAvgTemp(value);
@@ -35,10 +24,6 @@ function UserForm() {
         setShowTravelDays(value !== "" || avgTemp || humidity || weatherType);
     };
 
-    const handleSliderChange = (e) => {
-        const { name, value } = e.target;
-        setWeights((prev) => ({ ...prev, [name]: Number(value) }));
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -46,7 +31,6 @@ function UserForm() {
         const payload = {
             userBudget: Number(budget),
             totalTravelDays: Number(totalDays) || null,
-            travel_month: travelMonth || null,
             user_scenery_requirement: scenery,
             user_activity_preference: activities,
             user_weather_preference: {
@@ -56,7 +40,6 @@ function UserForm() {
             },
             weights,
         };
-
 
         console.log("Sending payload:", payload);
 
@@ -72,13 +55,27 @@ function UserForm() {
             const data = await res.json();
             console.log("Server response:", data);
 
-            // ✅ Redirect to result page
+            // ✅ Redirect to /result after successful submission
             navigate("/result", { state: { response: data } });
         } catch (err) {
             console.error("Error:", err);
             alert("Failed to submit preference.");
         }
     };
+
+    const [showOptional, setShowOptional] = useState(false);
+    const [weights, setWeights] = useState({
+        budget: 3,
+        scenery: 3,
+        activity: 3,
+        weather: 3,
+    });
+
+    const handleSliderChange = (e) => {
+        const { name, value } = e.target;
+        setWeights((prev) => ({ ...prev, [name]: Number(value) }));
+    };
+
 
     return (
         <div className="max-w-2xl mx-auto bg-white shadow-md rounded-2xl p-6 space-y-6">
@@ -116,17 +113,7 @@ function UserForm() {
                             className="w-full accent-blue-500 cursor-pointer"
                         />
                     </div>
-                </div>
 
-                {/* ✅ Always Visible: Total Travel Days */}
-                <div className="pt-3">
-                    <label className="block text-sm font-medium">Total Travel Days</label>
-                    <input
-                        type="number"
-                        value={totalDays}
-                        onChange={(e) => setTotalDays(e.target.value)}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
                 </div>
             </div>
 
@@ -188,25 +175,16 @@ function UserForm() {
 
                 {showTravelDays && (
                     <div className="pt-2">
-                        <label className="block text-sm font-medium">Travel Month</label>
-                        <select
+                        <label className="block text-sm font-medium">Total Travel Days</label>
+                        <input
+                            type="number"
+                            value={totalDays}
+                            onChange={(e) => setTotalDays(e.target.value)}
                             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            onChange={(e) => setTravelMonth(e.target.value)}
-                        >
-                            <option value="">Select Month</option>
-                            {[
-                                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-                            ].map((month) => (
-                                <option key={month} value={month}>
-                                    {month}
-                                </option>
-                            ))}
-                        </select>
+                        />
                     </div>
                 )}
             </div>
-
 
             {/* Optional Section */}
             <div className="border-t pt-4">
@@ -224,32 +202,95 @@ function UserForm() {
                         <p className="text-sm text-gray-500">
                             Adjust how important each factor is to you.
                             <br />
-                            <span className="font-medium text-gray-600">(1 = least important, 5 = most important)</span>
+                            <span className="font-medium text-gray-600">
+                                (1 = least important, 5 = most important)
+                            </span>
                         </p>
 
-                        {Object.entries(weights).map(([key, value]) => (
-                            <div key={key}>
-                                <label className="block font-medium text-gray-700 mb-1 capitalize">
-                                    {key} Importance
-                                </label>
-                                <input
-                                    type="range"
-                                    name={key}
-                                    min="1"
-                                    max="5"
-                                    step="1"
-                                    value={value}
-                                    onChange={handleSliderChange}
-                                    className="w-full"
-                                />
-                                <div className="text-sm text-gray-500">
-                                    Value: <span className="font-medium">{value}</span>
-                                </div>
+                        {/* Budget */}
+                        <div>
+                            <label className="block font-medium text-gray-700 mb-1">
+                                Budget Importance
+                            </label>
+                            <input
+                                type="range"
+                                name="budget"
+                                min="1"
+                                max="5"
+                                step="1"
+                                value={weights.budget}
+                                onChange={handleSliderChange}
+                                className="w-full"
+                            />
+                            <div className="text-sm text-gray-500">
+                                Value: <span className="font-medium">{weights.budget}</span>
                             </div>
-                        ))}
+                        </div>
+
+                        {/* Scenery */}
+                        <div>
+                            <label className="block font-medium text-gray-700 mb-1">
+                                Scenery Requirement Importance
+                            </label>
+                            <input
+                                type="range"
+                                name="scenery"
+                                min="1"
+                                max="5"
+                                step="1"
+                                value={weights.scenery}
+                                onChange={handleSliderChange}
+                                className="w-full"
+                            />
+                            <div className="text-sm text-gray-500">
+                                Value: <span className="font-medium">{weights.scenery}</span>
+                            </div>
+                        </div>
+
+                        {/* Activity */}
+                        <div>
+                            <label className="block font-medium text-gray-700 mb-1">
+                                Activity Requirement Importance
+                            </label>
+                            <input
+                                type="range"
+                                name="activity"
+                                min="1"
+                                max="5"
+                                step="1"
+                                value={weights.activity}
+                                onChange={handleSliderChange}
+                                className="w-full"
+                            />
+                            <div className="text-sm text-gray-500">
+                                Value: <span className="font-medium">{weights.activity}</span>
+                            </div>
+                        </div>
+
+                        {/* Weather */}
+                        <div>
+                            <label className="block font-medium text-gray-700 mb-1">
+                                Weather Preference Importance
+                            </label>
+                            <input
+                                type="range"
+                                name="weather"
+                                min="1"
+                                max="5"
+                                step="1"
+                                value={weights.weather}
+                                onChange={handleSliderChange}
+                                className="w-full"
+                            />
+                            <div className="text-sm text-gray-500">
+                                Value: <span className="font-medium">{weights.weather}</span>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
+
+
 
             {/* Submit Button */}
             <div className="text-center pt-4">

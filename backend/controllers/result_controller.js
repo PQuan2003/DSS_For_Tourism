@@ -50,10 +50,11 @@ exports.createNewResult = async (req, res) => {
 
     userBudget = Number(userBudget) || 0;
     totalTravelDays = Number(totalTravelDays) || 0;
-
+    // console.log(user_weather_preference, "aaaaaaaaaaaaaaaaa");
     if (
       (travel_month === undefined || travel_month === null) &&
-      user_weather_preference
+      user_weather_preference &&
+      Object.values(user_weather_preference).some((value) => value !== null)
     ) {
       return res.status(400).json({
         status: "failed",

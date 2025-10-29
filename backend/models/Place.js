@@ -111,7 +111,6 @@ module.exports = (sequelize, DataTypes) => {
       // cap at 1
       if (score > 1) score = 1;
 
-
       return Number(score.toFixed(3));
     }
 
@@ -143,7 +142,6 @@ module.exports = (sequelize, DataTypes) => {
           },
         ],
       });
-
 
       const allActivityNames = pois.flatMap(
         (poi) =>
@@ -182,12 +180,13 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     async calculatedWeatherPoint(user_weather_preference, travel_month) {
-      if (!user_weather_preference) return { score: 0.5, weather_data: null };
+      if (!user_weather_preference || !travel_month)
+        return { score: 0.5, weather_data: null };
 
       const weather = await sequelize.models.Weather_Conditions.findOne({
         where: {
           place_id: this.place_id,
-          month: travel_month,  
+          month: travel_month,
         },
       });
 
@@ -300,10 +299,8 @@ module.exports = (sequelize, DataTypes) => {
       
 */
 
-
-
-      //in testing
-      /* 
+//in testing
+/* 
       const bias = 0.1;
       const normalized = Math.min(1, (matchesCount - 1) / 5); // 5 or more matches = full score
       const curve = normalized ** 0.5; // non-linear curve for score increase
