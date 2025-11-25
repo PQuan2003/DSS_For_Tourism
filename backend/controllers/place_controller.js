@@ -1,9 +1,24 @@
 const { Place } = require("../models");
+const { Op, Sequelize } = require("sequelize");
 
 // Get all places
 exports.getAllPlaces = async (req, res, next) => {
   try {
-    const places = await Place.findAll();
+    const { country, tags } = req.query;
+    
+    const where = {};
+    // country=Japan
+    if (country) {
+      where.country = country;
+    }
+    if (tags) {
+      const tagList = tags.split(",").map((t) => t.trim().toLowerCase());
+
+      where[Op.or] = tagList.map((tag) =>
+        Sequelize.literal(`JSON_CONTAINS(LOWER(tags), '["${tag}"]')`)
+      );
+    }
+    const places = await Place.findAll({ where });
 
     res.json({
       status: "success",
