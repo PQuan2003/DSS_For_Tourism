@@ -1,5 +1,5 @@
-import NavBar from "../../components/NavBar/NavBar";
-import UserForm from "../../components/UserForm/UserForm"
+import NavBar from "../../components_old/NavBar/NavBar";
+import UserForm from "../../components_old/UserForm/UserForm"
 
 
 function Form() {

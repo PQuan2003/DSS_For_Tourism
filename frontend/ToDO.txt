@@ -21,3 +21,16 @@ hỏi "bạn thân" xem có cần thêm chức năng gì nữa k
 
 //Optional - Khó hơn
 - (Sau cai tren) See how to apply AHP to list for each parameter first
+
+//query 
+- distinct tag: 
+SELECT DISTINCT JSON_UNQUOTE(JSON_EXTRACT(tag, '$')) AS tag
+FROM Places,
+JSON_TABLE(tags, '$[*]' COLUMNS (tag JSON PATH '$')) AS jt
+ORDER BY tag;
+
+Link tới trang du lịch để hiện data đúng, k có mock nữa
+số tiền
+dịch vụ
+phương pháp vân chuyển
+dịch vụ thêm

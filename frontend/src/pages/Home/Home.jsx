@@ -1,6 +1,6 @@
 import './style_Home.css'
 import { Link } from "react-router-dom";
-import NavBar from "../../components/NavBar/NavBar";
+import NavBar from "../../components_old/NavBar/NavBar";
 import SlideShow from './SlideShow';
 function Home() {
 

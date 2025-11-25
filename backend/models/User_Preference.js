@@ -13,20 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
-  // User_Preference.init(
-  //   {
-  //     preference_id: {
-  //       type: DataTypes.INTEGER,
-  //       primaryKey: true,
-  //       autoIncrement: true,
-  //     },
-  //     activities: DataTypes.STRING,
-  //     budget: DataTypes.STRING,
-  //     preference_weight: DataTypes.INTEGER,
-  //     scenery: DataTypes.STRING,
-  //     travelling_duration: DataTypes.STRING,
-  //     user_id: DataTypes.INTEGER,
-  //   },
+ 
   User_Preference.init(
     {
       preference_id: {
