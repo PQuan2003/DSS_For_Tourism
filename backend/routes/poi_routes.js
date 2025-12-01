@@ -4,7 +4,7 @@ const POIController = require("../controllers/poi_controller");
 
 // CRUD endpoints
 router.get("/", POIController.getAllPOI);
-router.get("/:id", POIController.getPOIById);
+router.get("/id/:id", POIController.getPOIById);
 
 // router.post("/", POIController.createPlace);
 // router.put("/:id", POIController.updatePlace);

@@ -1,10 +1,8 @@
 import NavBar from "../../components_old/NavBar/NavBar";
-import UserForm from "../../components_old/UserForm/UserForm"
+import UserForm from "./components/UserForm/UserForm"
 
 
 function Form() {
-    // const form = useForm();
-
     return (
         <>
             <NavBar />

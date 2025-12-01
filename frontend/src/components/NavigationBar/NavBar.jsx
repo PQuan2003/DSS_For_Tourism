@@ -36,7 +36,7 @@ export function NavBar({ ...props }) {
     const [isDark, setIsDark] = useState(false)
 
     return (
-        <NavigationMenu>
+        <NavigationMenu className="sticky top-0 bg-gray-100">
             <NavigationMenuList>
                 <div className='flex justify-between items-center w-screen h-13 px-4'>
                     <NavigationMenuLink asChild className=' px-2'>

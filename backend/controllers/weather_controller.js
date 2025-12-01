@@ -1,3 +1,4 @@
+const { where } = require("sequelize");
 const { Weather_Conditions } = require("../models");
 
 // Get all weathers
@@ -27,5 +28,19 @@ exports.getWeatherByID = async (req, res, next) => {
     res.json(weather);
   } catch (err) {
     next(err);
+  }
+};
+
+exports.getWeatherByPlaceId = async (placeId) => {
+  try {
+    const weather = await Weather_Conditions.findAll({
+      where: {
+        place_id: placeId,
+      },
+    });
+
+    return weather ? weather : [];
+  } catch (err) {
+    console.log("Error fetching weathers:", err);
   }
 };

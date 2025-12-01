@@ -1,5 +1,22 @@
 const { Hotel } = require("../models");
 
+exports.getHotelByPlaceId = async (placeId) => {
+  try {
+    const hotels = await Hotel.findAll({
+      where: {
+        place_id: placeId
+      }
+    })
+
+    // if (!hotels) return []
+
+    return hotels ? hotels : []
+  } catch (err) {
+    console.log("Error fetching hotels")
+  }
+}
+
+
 // Get all users
 exports.getAllHotels = async (req, res, next) => {
   try {

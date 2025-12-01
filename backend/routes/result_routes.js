@@ -4,7 +4,7 @@ const ResultLController = require("../controllers/result_controller");
 
 // CRUD endpoints
 router.get("/", ResultLController.getAllResult);
-router.get("/:id", ResultLController.getResultById);
+router.get("/id/:id", ResultLController.getResultById);
 
 router.post("/new", ResultLController.createNewResult);
 

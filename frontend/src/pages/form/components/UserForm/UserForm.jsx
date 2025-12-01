@@ -72,7 +72,6 @@ function UserForm() {
             const data = await res.json();
             console.log("Server response:", data);
 
-            // ✅ Redirect to result page
             navigate("/result", { state: { response: data } });
         } catch (err) {
             console.error("Error:", err);

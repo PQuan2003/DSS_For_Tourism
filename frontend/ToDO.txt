@@ -1,16 +1,3 @@
-- Point Base for Budget with Normalization ✅
-- Point Base for Budget with Scenery ✅
-- Point Base for Budget with Activities (Gọi POI ra, và POI Activity để kiếm / có thể lm theo kiểu theo set) ✅
-- Point Base for Budget with Weather (gộp chung nhiệt độ + lượng mưa vô) ✅
-- Point Base for Tourist Density 
-
-1 route chung để tính điểm toàn place ✅
-
-chỉnh lại tags trong place db -> chỉ nhận tag mô tả scenery
-*** Ket hop UI front + back (siu quan trọng) (
-    chỉnh lại frontend form design cho hợp vs paramter - coi postman
-    hiện result = popup/quan trang mới   
-)
 
 
 //Other function
@@ -34,3 +21,12 @@ số tiền
 dịch vụ
 phương pháp vân chuyển
 dịch vụ thêm
+
+
+task 1/12:
+light dark mode - p4
+login / sign up - p3 + trang user/admin - p3
+learn more - p2 (đi cùng vs sửa lại landing)
+chỉnh trang result lại -p2
+cho search và filter trong search place - p1
+add hình - p2
