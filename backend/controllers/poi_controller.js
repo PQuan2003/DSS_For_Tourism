@@ -64,7 +64,7 @@ exports.getPOIByPlaceId = async (placeId) => {
         },
       ],
     });
-    console.log(JSON.stringify(poisWithActivities, null, 2));
+    // console.log(JSON.stringify(poisWithActivities, null, 2));
 
     if (poisWithActivities && poisWithActivities.length > 0) {
       return poisWithActivities.map((poi) => {

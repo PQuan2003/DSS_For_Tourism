@@ -1,6 +1,5 @@
 const { POI_Activity } = require("../models");
 
-// Get all users
 exports.getAllPOIActivity = async (req, res, next) => {
   try {
     const poi_activities = await POI_Activity.findAll();

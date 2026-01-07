@@ -9,11 +9,29 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useState } from "react"
 
 export function LoginForm({
   className,
   ...props
 }) {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+
+  const handelEmailChange = (email) => {
+    setEmail(email)
+  }
+
+  const handleSetPassword = (pw) => {
+    setPassword(pw)
+  }
+
+  const handleSubmitForm = (e) => {
+    e.preventDefault()
+    console.log(email)
+    console.log(password)
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -28,24 +46,21 @@ export function LoginForm({
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" required />
+                <Input id="email" type="email" placeholder="m@example.com" required onChange={(e) => handelEmailChange(e.target.value)} />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  <a
+                  {/* <a
                     href="#"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
                     Forgot your password?
-                  </a>
+                  </a> */}
                 </div>
-                <Input id="password" type="password" required />
+                <Input id="password" type="password" required onChange={(e) => handleSetPassword(e.target.value)} />
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" onClick={(e) => handleSubmitForm(e)}>
                 Login
-              </Button>
-              <Button variant="outline" className="w-full">
-                Login with Google
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">

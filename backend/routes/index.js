@@ -17,5 +17,7 @@ router.use("/results", require("./result_routes"));
 router.use("/user_preferences", require("./user_preference_routes"));
 router.use("/users", require("./user_routes"));
 router.use("/weathers", require("./weather_routes"));
+router.use("/form", require("./form_route"));
+router.use("/activities", require("./activity_route"));
 
 module.exports = router;

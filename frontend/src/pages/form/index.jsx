@@ -1,4 +1,4 @@
-import NavBar from "../../components_old/NavBar/NavBar";
+import { NavBar } from "@/components/NavigationBar/NavBar"
 import UserForm from "./components/UserForm/UserForm"
 
 

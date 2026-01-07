@@ -30,3 +30,24 @@ learn more - p2 (đi cùng vs sửa lại landing)
 chỉnh trang result lại -p2
 cho search và filter trong search place - p1
 add hình - p2
+
+
+todo 9/12
+- only reload content, k load nav bar ở trên
+
+
+
+
+/todo 17/12
+continue to try doing web crawling
+authentication (both fe and be)
+    - not login: can use system normally
+    - login: can view history, mark fav
+    - admin: add place manually + crawl web (see how to do it with python BE)
+fix front
+    - add picture (w/ cloudinary)
+    - change result page to better reflect result
+    - lúc search -> madives lỗi (chắc do nằm trong ngoặc)
+fix backend
+    - better algorithm?
+add missing value to .env

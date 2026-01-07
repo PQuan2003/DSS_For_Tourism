@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { NavBar } from "@/components/NavigationBar/NavBar";
 import {
     InputGroup,
@@ -22,10 +23,13 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { DialogOverlay } from "@radix-ui/react-dialog";
+import useDebound from "@/hooks/useDebound";
 
 
 
 function Destination() {
+    const queryParams = new URLSearchParams(location.search);
+
     const [placeData, setPlaceData] = useState()
 
     const [selectedCountries, setSelectedCountries] = useState([]);
@@ -40,25 +44,42 @@ function Destination() {
             tourist_density: [],
         }
     );
+    const [search, setSearch] = useState("");
+
+    const debouncedSearch = useDebound({ value: search, custom_debounce: 1000 })
+
     const [error, setError] = useState();
     const [isLoading, setIsLoading] = useState(false);
 
     const [isOpen, setIsOpen] = useState(false)
-    const [selectedPlace, setSelectedPlace] = useState(null)
+    const [selectedPlace, setSelectedPlace] = useState(queryParams.get('place_name'))
 
     const [isLoadingModal, setIsLoadingModal] = useState(false)
-    const [selectedPlaceData, setSelectedPlaceData] = useState(null);
+    const [selectedPlaceData, setSelectedPlaceData] = useState();
 
+    const updateURL = (params = {}) => {
+        const url = new URL(window.location);
 
+        Object.keys(params).forEach(key => {
+            if (params[key] !== null) {
+                url.searchParams.set(key, params[key]);
+            } else {
+                url.searchParams.delete(key);
+            }
+        });
+
+        window.history.pushState({}, '', url);
+    };
 
     const handleCardClick = (place) => {
-        setIsOpen(true)
         setSelectedPlace(place)
+        updateURL({ place_name: place });
     }
 
     const handleCloseModel = () => {
         setIsOpen(false);
         setSelectedPlace(null);
+        updateURL({ place_name: null });
     }
 
     const [showCountryFilter, setShowCountryFilter] = useState(false);
@@ -128,15 +149,14 @@ function Destination() {
         };
 
         fetchFilters();
-    }, []); // Empty array ensures this runs only on component mount
-
+    }, []);
 
     useEffect(() => {
         const fetchPlaceData = async () => {
-            if (selectedFilters) {  // Only fetch place data when selectedFilters are available
-                setIsLoading(true);
-                try {
-                    const params = new URLSearchParams
+            setIsLoading(true);
+            try {
+                const params = new URLSearchParams
+                if (selectedFilters) {
                     if (selectedFilters.country?.length > 0) {
                         // single or multiple countries → join with comma
                         params.append("country", selectedFilters.country.join(","));
@@ -150,32 +170,29 @@ function Destination() {
                         params.append("density", selectedFilters.tourist_density.join(","));
                         // adjust the key based on your API ("density" in your sample)
                     }
-                    const response = await fetch(`http://localhost:8080/places?${params.toString()}`);
-                    const data = await response.json();
-                    console.log("New dataaaaaa", data)
-                    setPlaceData(data);
-                } catch (e) {
-                    setError(e);
-                } finally {
-                    setIsLoading(false);
                 }
+                if (debouncedSearch) {
+                    params.append("search", debouncedSearch)
+                }
+                const response = await fetch(`http://localhost:8080/places?${params.toString()}`);
+                const data = await response.json();
+                // console.log("New dataaaaaa", data)
+                setPlaceData(data);
+            } catch (e) {
+                setError(e);
+            } finally {
+                setIsLoading(false);
             }
         };
 
         fetchPlaceData();
-    }, [selectedFilters]);
-
-    useEffect(() => {
-        console.log("Filter go change")
-        console.log(selectedFilters)
-    }, [selectedFilters])
+    }, [selectedFilters, debouncedSearch]);
 
     useEffect(() => {
         const fetchSelectedPlace = async () => {
             setIsLoadingModal(true);
             if (selectedPlace) {
                 try {
-                    console.log("Get place:", selectedPlace)
                     const response = await fetch(`http://localhost:8080/places/name/${selectedPlace}`);
                     const data = await response.json();
                     setSelectedPlaceData(data)
@@ -190,6 +207,10 @@ function Destination() {
         fetchSelectedPlace();
     }, [selectedPlace]);
 
+    useEffect(() => {
+        setIsOpen(selectedPlaceData ? true : false)
+    }, [selectedPlaceData])
+
     // Handle loading, error, and empty state
     if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error: {error.message}</div>;
@@ -201,7 +222,10 @@ function Destination() {
             <div className="flex flex-col mx-6 my-4 gap-6 pt-4">
                 <div className="flex justify-center gap-3">
                     <InputGroup className="max-w-xl">
-                        <InputGroupInput placeholder="Search..." />
+                        <InputGroupInput
+                            placeholder="Search..."
+                            onChange={(e) => { setSearch(e.target.value) }}
+                        />
                         <InputGroupAddon>
                             <Search />
                         </InputGroupAddon>
@@ -246,7 +270,7 @@ function Destination() {
                             )}
                         </div>
 
-                        {/* Tags Filter */}
+
                         <div className="relative" ref={tagRef}>
                             <button onClick={toggleTagFilter} className="w-[200px] bg-gray-200 p-2 rounded max-h-10 overflow-hidden">
                                 {selectedTags.length > 0
@@ -281,7 +305,6 @@ function Destination() {
                             )}
                         </div>
 
-                        {/* Tourist Density Filter */}
                         <div className="relative" ref={densityRef}>
                             <button onClick={toggleDensityFilter} className="w-[200px] bg-gray-200 p-2 rounded">
                                 {selectedDensity.length > 0
@@ -343,7 +366,7 @@ function Destination() {
                             <>
                                 {/* Hero Image */}
                                 <img
-                                    src="https://placeholdit.com/300x300/dddddd/999999"
+                                    src={selectedPlaceData.place.place_img}
                                     alt={selectedPlaceData.place.place_name}
                                     className="w-full h-72 object-cover rounded-t-lg"
                                 />
@@ -544,8 +567,6 @@ function Destination() {
                         )}
                     </DialogContent>
                 </Dialog>
-
-
             </div>
         </>
     );

@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
 
     calculatedBudgetPoint(userBudget, totalTravelDays) {
       const tolerance = 0.1; // 10% tolerance
-      const underTolerance = 0.5; // 50% tolerance before making the place have full score
+      const underTolerance = 0.75; // 75% tolerance before making the place have full score
       const bias = 0.05; // 5% advantage for under-budget
 
       let score = 0;
@@ -40,11 +40,10 @@ module.exports = (sequelize, DataTypes) => {
       if (userBudget < totalBudgetNeeded) {
         // Over budget but within tolerance
         const ratio = percentageDiff / tolerance;
-        score = 0.5 * (1 - ratio ** 2); // curve downward smoothly
+        score = 0.5 * (1 - ratio ** 2); // score curves downward
         score = Math.max(0, score - bias * 0.5);
       } else {
         if (percentageDiff > underTolerance) {
-          // Way under budget → max score
           return {
             score: 1,
             totalBudgetNeeded,
@@ -53,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
 
         // Under budget with smaller difference
         const ratio = percentageDiff / underTolerance;
-        score = 0.5 + 0.5 * ratio ** 0.5; // sqrt curve - not linear, reward better score for being further under budget
+        score = 0.5 + 0.5 * ratio ** 0.5; // sqrt curve 
         score = Math.min(score, 1);
       }
       return {
@@ -63,7 +62,6 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     calculatedSceneryPoint(user_scenery_preferences) {
-      //Default value when the user doesnt set their scenery preferences
       if (
         !Array.isArray(user_scenery_preferences) ||
         user_scenery_preferences.length === 0
@@ -79,7 +77,7 @@ module.exports = (sequelize, DataTypes) => {
           placeTags = JSON.parse(placeTags);
         } catch (e) {
           placeTags = placeTags
-            .replace(/[\[\]']/g, "") // remove [ ] and single quotes
+            .replace(/[\[\]']/g, "")
             .split(",")
             .map((t) => t.trim())
             .filter(Boolean);
@@ -94,21 +92,19 @@ module.exports = (sequelize, DataTypes) => {
       );
       const tagsLower = placeTags.map((t) => String(t).toLowerCase().trim());
 
-      // count unique matches (so duplicates in either list don't inflate score)
+      // count unique matches
       const matchedSet = new Set();
       for (const pref of userPrefsLower) {
         if (tagsLower.includes(pref)) matchedSet.add(pref);
       }
 
       const matchesCount = matchedSet.size;
-      if (matchesCount === 0) return 0; // no match = 0
-      if (matchesCount === 1) return 0.5; // one match = 0.5
+      if (matchesCount === 0) return 0; // no match 
+      if (matchesCount === 1) return 0.5; // one match 
 
       const bias = 0.1;
-      // additional matches add bias
+    
       let score = 0.5 + bias * (matchesCount - 1);
-
-      // cap at 1
       if (score > 1) score = 1;
 
       return Number(score.toFixed(3));
@@ -119,8 +115,10 @@ module.exports = (sequelize, DataTypes) => {
         !Array.isArray(user_activity_preference) ||
         user_activity_preference.length === 0
       ) {
-        // console.log("Default option choosen", user_activity_preference);
-        return 0.5;
+        return {
+          score: 0,
+          place_activity_tags: {},
+        };
       }
 
       // console.log("Running activity normally");
@@ -173,6 +171,7 @@ module.exports = (sequelize, DataTypes) => {
 
       if (score > 1) score = 1;
 
+      console.log("final return", score, typeof allActivityNames);
       return {
         score: Number(score.toFixed(2)),
         place_activity_tags: allActivityNames,
@@ -244,7 +243,7 @@ module.exports = (sequelize, DataTypes) => {
       tags: {
         type: DataTypes.JSON,
         allowNull: true,
-        // getter: return an array always
+
         get() {
           const raw = this.getDataValue("tags");
           if (!raw) return [];
@@ -252,7 +251,6 @@ module.exports = (sequelize, DataTypes) => {
           try {
             return JSON.parse(raw);
           } catch {
-            // fallback for weird string format
             return String(raw)
               .replace(/[\[\]']/g, "")
               .split(",")
@@ -260,12 +258,10 @@ module.exports = (sequelize, DataTypes) => {
               .filter(Boolean);
           }
         },
-        // setter: accept arrays and strings; store array directly for JSON column
         set(val) {
           if (Array.isArray(val)) {
             this.setDataValue("tags", val);
           } else {
-            // leave as-is (Sequelize will stringify when storing in JSON column)
             this.setDataValue("tags", val);
           }
         },
@@ -282,28 +278,3 @@ module.exports = (sequelize, DataTypes) => {
 
   return Place;
 };
-
-/*Note: 
-      structure:
-      user_weather_preference = {
-        avg_temp: 17,
-        humidity: 50,
-        weather_type: "Sunny"
-      }
-      travel_month = "Feb"
-      
-      score là avg của cả 3 category
-      giả sử 1 trong 3 thiếu / ng dùng k điền thì cho default = 0.5
-
-      json trả về: gồm điểm + 3 giá trị trên để tiện debug
-      
-*/
-
-//in testing
-/* 
-      const bias = 0.1;
-      const normalized = Math.min(1, (matchesCount - 1) / 5); // 5 or more matches = full score
-      const curve = normalized ** 0.5; // non-linear curve for score increase
-      let score = 0.5 + 0.5 * curve; // ranges smoothly 0.5–1
-      score = Math.min(score, 1); 
-       */

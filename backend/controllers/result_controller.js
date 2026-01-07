@@ -1,6 +1,8 @@
 const { Result, Place } = require("../models");
+const { handleCalculateAHP } = require("../utils/handleCalculateAHP");
+const { validate_number } = require("../utils/validate_number");
 
-// Get all users
+
 exports.getAllResult = async (req, res, next) => {
   try {
     const result = await Result.findAll();
@@ -19,7 +21,6 @@ exports.getAllResult = async (req, res, next) => {
   }
 };
 
-// Get user by ID
 exports.getResultById = async (req, res, next) => {
   try {
     const result = await Result.findByPk(req.params.id);
@@ -46,11 +47,21 @@ exports.createNewResult = async (req, res) => {
       user_activity_preference = [],
       user_weather_preference = {},
       travel_month,
+      weights = {},
     } = req.body || {};
+
+    let ahp_weights = {};
+
+    const hasWeights =
+      weights && typeof weights === "object" && Object.keys(weights).length > 0;
+
+    if (hasWeights) {
+      ahp_weights = handleCalculateAHP(weights);
+    }
 
     userBudget = Number(userBudget) || 0;
     totalTravelDays = Number(totalTravelDays) || 0;
-    // console.log(user_weather_preference, "aaaaaaaaaaaaaaaaa");
+
     if (
       (travel_month === undefined || travel_month === null) &&
       user_weather_preference &&
@@ -65,28 +76,53 @@ exports.createNewResult = async (req, res) => {
     const places = await Place.findAll();
     let scorings = await Promise.all(
       places.map(async (place) => {
-        const { score: budget_score } = await place.calculatedBudgetPoint(
+        const { score: raw_budget_score } = await place.calculatedBudgetPoint(
           userBudget,
           totalTravelDays
         );
-        const scenery_score = await place.calculatedSceneryPoint(
+        const budget_score = validate_number(raw_budget_score, "budget_score");
+
+        const raw_scenery_score = await place.calculatedSceneryPoint(
           user_scenery_requirement
         );
-
-        const { score: activity_score } = await place.calculatedActivityPoint(
-          user_activity_preference
+        const scenery_score = validate_number(
+          raw_scenery_score,
+          "scenery_score"
         );
 
-        const { score: weather_score } = await place.calculatedWeatherPoint(
+        const { score: raw_activity_score } =
+          await place.calculatedActivityPoint(user_activity_preference);
+        const activity_score = validate_number(
+          raw_activity_score,
+          "activity_score"
+        );
+
+        const { score: raw_weather_score } = await place.calculatedWeatherPoint(
           user_weather_preference,
           travel_month
         );
+        const weather_score = validate_number(
+          raw_weather_score,
+          "weather_score"
+        );
+        const total_score =
+          hasWeights && ahp_weights
+            ? budget_score * ahp_weights.budget +
+              scenery_score * ahp_weights.scenery +
+              activity_score * ahp_weights.activity +
+              weather_score * ahp_weights.weather
+            : budget_score + scenery_score + activity_score + weather_score;
 
         return {
           place_id: place.place_id,
           place_name: place.place_name,
           total_score:
-            budget_score + scenery_score + activity_score + weather_score,
+            hasWeights && ahp_weights
+              ? budget_score * ahp_weights.budget +
+                scenery_score * ahp_weights.scenery +
+                activity_score * ahp_weights.activity +
+                weather_score * ahp_weights.weather
+              : budget_score + scenery_score + activity_score + weather_score,
           detailed_scores: {
             budget_score,
             scenery_score,
@@ -108,6 +144,8 @@ exports.createNewResult = async (req, res) => {
         user_activity_preference,
         user_weather_preference,
         travel_month,
+        weights,
+        AHP_weights: hasWeights && ahp_weights ? ahp_weights : {},
       },
       content: scorings,
     });

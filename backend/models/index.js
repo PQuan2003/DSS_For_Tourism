@@ -15,14 +15,15 @@ sequelize = new Sequelize(
   config.username,
   config.password,
   config
+  
 );
 
 (async () => {
   try {
     await sequelize.authenticate();
-    console.log("✅ Database connection established successfully.");
+    console.log("Database connection established successfully.");
   } catch (err) {
-    console.error("❌ Unable to connect to the database:", err);
+    console.error("Unable to connect to the database:", err);
   }
 })();
 

@@ -5,6 +5,7 @@ const placeController = require("../controllers/place_controller");
 // CRUD endpoints
 router.get("/", placeController.getAllPlaces);
 router.get("/filters", placeController.getPlaceFilters);
+router.get("/images", placeController.getPlaceImages);
 router.get("/id/:id", placeController.getPlaceById);
 router.get("/name/:place", placeController.getPlaceByName);
 

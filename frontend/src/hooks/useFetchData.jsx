@@ -1,40 +1,34 @@
-import { useState, useEffect, useRef } from 'react';
+
+import { useState, useEffect } from 'react';
 
 const useFetchData = (url) => {
-    const abortControllerRef = useRef(null);
+    const [data, setData] = useState(null);  
+    const [loading, setLoading] = useState(true);  
+    const [error, setError] = useState(null); 
 
-    const fetchPosts = async () => {
-        const [data, setData] = useState()
-        const [error, setError] = useState()
-        const [isLoading, setIsLoading] = useState(true)
+    useEffect(() => {
+        setLoading(true);
+        setError(null);
 
-        if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
-        }
-        abortControllerRef.current = new AbortController();
-
-        setIsLoading(true);
-
-        try {
-            const response = await fetch(url, {
-                signal: abortControllerRef.current.signal,
-            });
-            const data = await response.json();
-            setData(data);
-        } catch (e) {
-            if (e.name === "AbortError") {
-                console.log("Aborted");
-                return;
+        const fetchData = async () => {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const result = await response.json();
+                setData(result);
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
             }
+        };
 
-            setError(e);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        fetchData();
+    }, [url]); 
 
-    return {}
-
+    return { data, loading, error };
 };
 
 export default useFetchData;

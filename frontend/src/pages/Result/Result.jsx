@@ -2,10 +2,12 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import UserPreferencesSummary from "../../components_old/ResultComp/UserPreferencesSummary";
 import { NavBar } from "@/components/NavigationBar/NavBar";
+import { Search } from "lucide-react";
 
 export default function RecommendationResult() {
     const navigate = useNavigate();
     const location = useLocation();
+
 
     // Get the data passed from the form page``
     const data = location.state?.response;
@@ -16,11 +18,13 @@ export default function RecommendationResult() {
     }
 
     const { user_preferences, content } = data;
-    console.log("Contenttttttttttt\n", content, "\n\n\n\n\n")
     const topPlace = content[0];
-    console.log("Topppppppppp\n", topPlace, "\n\n\n\n\n")
 
     const otherPlaces = content.slice(1);
+
+    const handleSearchClick = (destination) => {
+        navigate(`/destination?place_name=${destination}`); 
+    };
 
     return (
         <div>
@@ -34,35 +38,45 @@ export default function RecommendationResult() {
                 <UserPreferencesSummary user_preferences={user_preferences} />
 
                 {/* Top Recommendation */}
-                <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-2xl shadow-lg p-6">
-                    <h2 className="text-xl font-semibold text-blue-800 mb-2">
-                        🌟 Top Recommendation
-                    </h2>
-                    <h3 className="text-2xl font-bold text-gray-800">
-                        {topPlace.place_name}
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                        Total Score:{" "}
-                        <span className="font-semibold text-blue-700">
-                            {topPlace?.total_score?.toFixed(3)}
-                        </span>
-                    </p>
+                <div className="flex bg-linear-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-2xl shadow-lg p-6">
+                    <div>
+                        <h2 className="text-xl font-semibold text-blue-800 mb-2">
+                            🌟 Top Recommendation
+                        </h2>
+                        <h3 className="text-2xl font-bold text-gray-800">
+                            {topPlace.place_name}
+                        </h3>
+                        <p className="text-gray-600 mb-4">
+                            Total Score:{" "}
+                            <span className="font-semibold text-blue-700">
+                                {topPlace?.total_score?.toFixed(3)}
+                            </span>
+                        </p>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-                        {Object.entries(topPlace?.detailed_scores).map(([key, value]) => (
-                            <div
-                                key={key}
-                                className="bg-white rounded-xl shadow-sm p-3 border border-gray-100"
-                            >
-                                <p className="text-sm font-medium text-gray-500">
-                                    {key.replace("_score", "").replace(/_/g, " ")}
-                                </p>
-                                <p className="text-lg font-semibold text-blue-700">
-                                    {value.toFixed(3)}
-                                </p>
-                            </div>
-                        ))}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                            {Object.entries(topPlace?.detailed_scores).map(([key, value]) => (
+                                <div
+                                    key={key}
+                                    className="bg-white rounded-xl shadow-sm p-3 border border-gray-100"
+                                >
+                                    <p className="text-sm font-medium text-gray-500">
+                                        {key.replace("_score", "").replace(/_/g, " ")}
+                                    </p>
+                                    <p className="text-lg font-semibold text-blue-700">
+                                        {value.toFixed(3)}
+                                    </p>
+                                </div>
+
+
+                            ))}
+                        </div>
                     </div>
+                    <button
+                        className="ml-auto mt-auto p-4 flex bg-gray-300"
+                        onClick={() => handleSearchClick(topPlace.place_name)}>
+                        <Search className="mx-2" />
+                        <p>More info</p>
+                    </button>
                 </div>
 
                 {/* Other Matches Section */}
@@ -79,6 +93,7 @@ export default function RecommendationResult() {
                                 <div className="flex items-center gap-2">
                                     <span className="font-semibold">{place?.place_name}</span>
                                     <span className="text-gray-600">(Total: {place?.total_score?.toFixed(3)})</span>
+
                                 </div>
 
                                 <div className="flex items-center gap-2 text-xs">

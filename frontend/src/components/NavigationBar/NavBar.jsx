@@ -1,4 +1,4 @@
-import { useLocation, Link } from 'react-router-dom'
+import { useLocation, Link, useNavigate } from 'react-router-dom'
 
 import {
     NavigationMenu,
@@ -17,6 +17,7 @@ import { useState } from 'react'
 
 
 export function NavBar({ ...props }) {
+    const navigate = useNavigate()
     const navItems = [
         {
             title: "Home",
@@ -34,6 +35,10 @@ export function NavBar({ ...props }) {
 
     const location = useLocation();
     const [isDark, setIsDark] = useState(false)
+
+    const handleButtonClick = (url) => {
+        navigate(`/${url}`)
+    }
 
     return (
         <NavigationMenu className="sticky top-0 bg-gray-100">
@@ -58,13 +63,13 @@ export function NavBar({ ...props }) {
                             )
                         })}
                     </div>
-                    <div className='flex'>
-                        <Button className='rounded-2xl'>Login</Button>
-                        <Button className='rounded-2xl ml-4'>Sign Up</Button>
+                    {/* <div className='flex'>
+                        <Button className='rounded-2xl' onClick={() => handleButtonClick("login")}>Login</Button>
+                        <Button className='rounded-2xl ml-4' onClick={() => handleButtonClick("signup")}>Sign Up</Button>
                         <Button className='rounded-2xl ml-4' onClick={() => setIsDark(!isDark)}>
                             {isDark ? <Moon /> : <Sun />}
                         </Button>
-                    </div>
+                    </div> */}
                 </div>
             </NavigationMenuList>
         </NavigationMenu>

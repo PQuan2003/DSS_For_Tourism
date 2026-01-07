@@ -19,7 +19,7 @@ const getDistinctCountry = async () => {
   }
 };
 
-const getDistictPlaceTags = async () => {
+exports.getDistictPlaceTags = async () => {
   try {
     const places = await Place.findAll({
       attributes: ["tags"],
@@ -33,6 +33,8 @@ const getDistictPlaceTags = async () => {
     });
 
     const distinctTags = [...new Set(allTags.map((tag) => tag))];
+
+    distinctTags.sort((a, b) => a.localeCompare(b));
 
     return distinctTags ? distinctTags : [];
   } catch (err) {
@@ -54,51 +56,34 @@ const getDistinctDensity = async () => {
     const density = raw_data
       ? raw_data.map((place) => place.tourist_density)
       : [];
-    console.log(density);
     return density;
   } catch (err) {
     console.error("Error fetching distinct countries:", err);
   }
 };
 
+const getPlaceImageCollection = async () => {
+  try {
+    const imgs = await Place.findAll({
+      attributes: ["place_id", "place_img"],
+    });
+
+    return imgs ? imgs : [];
+  } catch (err) {
+    console.error("Error fetching imgs:", err);
+  }
+};
+
 // Get all places
 exports.getAllPlaces = async (req, res, next) => {
   try {
-    const { country, tags, density } = req.query;
-    console.log("DENSITYYYYYYY", density);
+    const { country, tags, density, search } = req.query;
+    // console.log("DENSITYYYYYYY", density);
 
     const where = {
       [Op.and]: [], // this will collect all groups
     };
 
-    // if (country) {
-    //   const countryList = country.split(",").map((t) => t.trim().toLowerCase());
-
-    //   where[Op.and].push({
-    //     [Op.or]: countryList.map((c) =>
-    //       Sequelize.literal(`LOWER(country) = '${c}'`)
-    //     ),
-    //   });
-    // }
-    // if (tags) {
-    //   const tagList = tags.split(",").map((t) => t.trim().toLowerCase());
-
-    //   where[Op.or].push({
-    //     [Op.or]: tagList.map((tag) =>
-    //       Sequelize.literal(`JSON_CONTAINS(LOWER(tags), '["${tag}"]')`)
-    //     ),
-    //   });
-    // }
-
-    // if (density) {
-    //   const densityList = density.split(",").map((t) => t.trim().toLowerCase());
-
-    //   where[Op.and].push({
-    //     [Op.or]: densityList.map((d) =>
-    //       Sequelize.literal(`LOWER(tourist_density) = '${d}'`)
-    //     ),
-    //   });
-    // }
     if (country) {
       const countryList = country.split(",").map((c) => c.trim().toLowerCase());
 
@@ -126,6 +111,16 @@ exports.getAllPlaces = async (req, res, next) => {
         [Op.or]: densityList.map((d) =>
           Sequelize.literal(`LOWER(tourist_density) = '${d}'`)
         ),
+      });
+    }
+
+    if (search) {
+      where[Op.and].push({
+        [Op.or]: [
+          Sequelize.literal(
+            `LOWER(place_name) LIKE '%${search.toLowerCase()}%'`
+          ),
+        ],
       });
     }
 
@@ -161,13 +156,10 @@ exports.getPlaceByName = async (req, res) => {
       return res.status(404).json({ message: "Place not found" });
     }
 
-    //TODO: get hotel list
     const hotels = await getHotelByPlaceId(result.place_id);
 
-    //TODO: get Weather Data
     const weather_data = await getWeatherByPlaceId(result.place_id);
 
-    //TODO: get POI + activities list
     const poi_data = await getPOIByPlaceId(result.place_id);
 
     //TODO chỉnh lại cái này
@@ -499,7 +491,6 @@ exports.calculatedAllPlaceWeatherPoint = async (req, res) => {
       status: "success",
       content: scorings,
     });
-    console.log("finished calculating all weather point");
   } catch (err) {
     console.log("Error calculating weather scores", err);
     res.status(500).json({
@@ -565,14 +556,32 @@ exports.calculateIndividualPlaceWeatherScore = async (req, res) => {
 };
 
 exports.getPlaceFilters = async (req, res) => {
-  const countries = await getDistinctCountry();
-  const tags = await getDistictPlaceTags();
-  const density = await getDistinctDensity();
+  try {
+    const countries = await getDistinctCountry();
+    const tags = await this.getDistictPlaceTags();
+    const density = await getDistinctDensity();
 
-  res.json({
-    status: "success",
-    country: countries,
-    tags: tags,
-    tourist_density: density,
-  });
+    res.json({
+      status: "success",
+      country: countries,
+      tags: tags,
+      tourist_density: density,
+    });
+  } catch (error) {
+    console.error("Error in getPlaceFilters:", error);
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+exports.getPlaceImages = async (req, res) => {
+  try {
+    const imgs = await getPlaceImageCollection();
+    res.json({
+      status: "success",
+      imgs: imgs,
+    });
+  } catch (error) {
+    console.error("Error in getPlaceImageCollection:", error);
+    res.status(500).json({ status: "error", message: error.message });
+  }
 };

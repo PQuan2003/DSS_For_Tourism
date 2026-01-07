@@ -8,8 +8,5 @@ router.get("/id/:id", ResultLController.getResultById);
 
 router.post("/new", ResultLController.createNewResult);
 
-// router.post("/", ResultLController.createPlace);
-// router.put("/:id", ResultLController.updatePlace);
-// router.delete("/:id", ResultLController.deletePlace);
 
 module.exports = router;
