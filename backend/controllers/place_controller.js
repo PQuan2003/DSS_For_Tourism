@@ -4,191 +4,7 @@ const { getHotelByPlaceId } = require("./hotel_controller");
 const { getWeatherByPlaceId } = require("./weather_controller");
 const { getPOIByPlaceId } = require("./poi_controller");
 
-const getDistinctCountry = async () => {
-  try {
-    const raw_data = await Place.findAll({
-      attributes: [
-        [Sequelize.fn("DISTINCT", Sequelize.col("country")), "country"],
-      ],
-    });
-
-    const countries = raw_data ? raw_data.map((place) => place.country) : [];
-    return countries;
-  } catch (err) {
-    console.error("Error fetching distinct countries:", err);
-  }
-};
-
-exports.getDistictPlaceTags = async () => {
-  try {
-    const places = await Place.findAll({
-      attributes: ["tags"],
-    });
-    let allTags = [];
-
-    places.forEach((place) => {
-      if (Array.isArray(place.tags)) {
-        allTags = allTags.concat(place.tags);
-      }
-    });
-
-    const distinctTags = [...new Set(allTags.map((tag) => tag))];
-
-    distinctTags.sort((a, b) => a.localeCompare(b));
-
-    return distinctTags ? distinctTags : [];
-  } catch (err) {
-    console.error("Error fetching distinct tags:", err);
-  }
-};
-
-const getDistinctDensity = async () => {
-  try {
-    const raw_data = await Place.findAll({
-      attributes: [
-        [
-          Sequelize.fn("DISTINCT", Sequelize.col("tourist_density")),
-          "tourist_density",
-        ],
-      ],
-    });
-
-    const density = raw_data
-      ? raw_data.map((place) => place.tourist_density)
-      : [];
-    return density;
-  } catch (err) {
-    console.error("Error fetching distinct countries:", err);
-  }
-};
-
-const getPlaceImageCollection = async () => {
-  try {
-    const imgs = await Place.findAll({
-      attributes: ["place_id", "place_img"],
-    });
-
-    return imgs ? imgs : [];
-  } catch (err) {
-    console.error("Error fetching imgs:", err);
-  }
-};
-
-// Get all places
-exports.getAllPlaces = async (req, res, next) => {
-  try {
-    const { country, tags, density, search } = req.query;
-    // console.log("DENSITYYYYYYY", density);
-
-    const where = {
-      [Op.and]: [], // this will collect all groups
-    };
-
-    if (country) {
-      const countryList = country.split(",").map((c) => c.trim().toLowerCase());
-
-      where[Op.and].push({
-        [Op.or]: countryList.map((c) =>
-          Sequelize.literal(`LOWER(country) = '${c}'`)
-        ),
-      });
-    }
-
-    if (tags) {
-      const tagList = tags.split(",").map((t) => t.trim().toLowerCase());
-
-      where[Op.and].push({
-        [Op.or]: tagList.map((tag) =>
-          Sequelize.literal(`JSON_CONTAINS(LOWER(tags), '["${tag}"]')`)
-        ),
-      });
-    }
-
-    if (density) {
-      const densityList = density.split(",").map((d) => d.trim().toLowerCase());
-
-      where[Op.and].push({
-        [Op.or]: densityList.map((d) =>
-          Sequelize.literal(`LOWER(tourist_density) = '${d}'`)
-        ),
-      });
-    }
-
-    if (search) {
-      where[Op.and].push({
-        [Op.or]: [
-          Sequelize.literal(
-            `LOWER(place_name) LIKE '%${search.toLowerCase()}%'`
-          ),
-        ],
-      });
-    }
-
-    const places = await Place.findAll({ where });
-
-    res.json({
-      status: "success",
-      content: places,
-    });
-  } catch (err) {
-    console.error("Error fetching places:", err);
-  }
-};
-
-exports.getPlaceByName = async (req, res) => {
-  try {
-    const { place } = req.params;
-    if (!place) {
-      return res
-        .status(400)
-        .json({ error: "place_name parameter is required" });
-    }
-
-    const result = await Place.findOne({
-      where: Sequelize.where(
-        Sequelize.fn("LOWER", Sequelize.col("place_name")),
-        "=",
-        place.toLowerCase()
-      ),
-    });
-
-    if (!result) {
-      return res.status(404).json({ message: "Place not found" });
-    }
-
-    const hotels = await getHotelByPlaceId(result.place_id);
-
-    const weather_data = await getWeatherByPlaceId(result.place_id);
-
-    const poi_data = await getPOIByPlaceId(result.place_id);
-
-    //TODO chỉnh lại cái này
-    return res.status(200).json({
-      // status: "success",
-      place: result,
-      availableHotel: hotels,
-      weather_data: weather_data,
-      pois: poi_data,
-    });
-  } catch (err) {
-    console.error("Error fetching place:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-// Get place by ID
-exports.getPlaceById = async (req, res, next) => {
-  try {
-    const place = await Place.findByPk(req.params.id);
-    res.json({
-      status: "success",
-      content: place ? place : "Place not found",
-    });
-  } catch (err) {
-    console.error("Error fetching places:", err);
-  }
-};
-
+/*Math function*/
 exports.calculatedAllPlaceBudgetPoint = async (req, res, next) => {
   try {
     let { userBudget, totalTravelDays } = req.body;
@@ -555,6 +371,176 @@ exports.calculateIndividualPlaceWeatherScore = async (req, res) => {
   }
 };
 
+
+/*Get function*/
+exports.getDistictPlaceTags = async () => {
+  try {
+    const places = await Place.findAll({
+      attributes: ["tags"],
+    });
+    let allTags = [];
+
+    places.forEach((place) => {
+      if (Array.isArray(place.tags)) {
+        allTags = allTags.concat(place.tags);
+      }
+    });
+
+    const distinctTags = [...new Set(allTags.map((tag) => tag))];
+
+    distinctTags.sort((a, b) => a.localeCompare(b));
+
+    return distinctTags ? distinctTags : [];
+  } catch (err) {
+    console.error("Error fetching distinct tags:", err);
+  }
+};
+
+const getDistinctDensity = async () => {
+  try {
+    const raw_data = await Place.findAll({
+      attributes: [
+        [
+          Sequelize.fn("DISTINCT", Sequelize.col("tourist_density")),
+          "tourist_density",
+        ],
+      ],
+    });
+
+    const density = raw_data
+      ? raw_data.map((place) => place.tourist_density)
+      : [];
+    return density;
+  } catch (err) {
+    console.error("Error fetching distinct countries:", err);
+  }
+};
+
+const getPlaceImageCollection = async () => {
+  try {
+    const imgs = await Place.findAll({
+      attributes: ["place_id", "place_img"],
+    });
+
+    return imgs ? imgs : [];
+  } catch (err) {
+    console.error("Error fetching imgs:", err);
+  }
+};
+
+exports.getAllPlaces = async (req, res, next) => {
+  try {
+    const { country, tags, density, search } = req.query;
+    // console.log("DENSITYYYYYYY", density);
+
+    const where = {
+      [Op.and]: [], // this will collect all groups
+    };
+
+    if (country) {
+      const countryList = country.split(",").map((c) => c.trim().toLowerCase());
+
+      where[Op.and].push({
+        [Op.or]: countryList.map((c) =>
+          Sequelize.literal(`LOWER(country) = '${c}'`)
+        ),
+      });
+    }
+
+    if (tags) {
+      const tagList = tags.split(",").map((t) => t.trim().toLowerCase());
+
+      where[Op.and].push({
+        [Op.or]: tagList.map((tag) =>
+          Sequelize.literal(`JSON_CONTAINS(LOWER(tags), '["${tag}"]')`)
+        ),
+      });
+    }
+
+    if (density) {
+      const densityList = density.split(",").map((d) => d.trim().toLowerCase());
+
+      where[Op.and].push({
+        [Op.or]: densityList.map((d) =>
+          Sequelize.literal(`LOWER(tourist_density) = '${d}'`)
+        ),
+      });
+    }
+
+    if (search) {
+      where[Op.and].push({
+        [Op.or]: [
+          Sequelize.literal(
+            `LOWER(place_name) LIKE '%${search.toLowerCase()}%'`
+          ),
+        ],
+      });
+    }
+
+    const places = await Place.findAll({ where });
+
+    res.json({
+      status: "success",
+      content: places,
+    });
+  } catch (err) {
+    console.error("Error fetching places:", err);
+  }
+};
+
+exports.getPlaceByName = async (req, res) => {
+  try {
+    const { place } = req.params;
+    if (!place) {
+      return res
+        .status(400)
+        .json({ error: "place_name parameter is required" });
+    }
+
+    const result = await Place.findOne({
+      where: Sequelize.where(
+        Sequelize.fn("LOWER", Sequelize.col("place_name")),
+        "=",
+        place.toLowerCase()
+      ),
+    });
+
+    if (!result) {
+      return res.status(404).json({ message: "Place not found" });
+    }
+
+    const hotels = await getHotelByPlaceId(result.place_id);
+
+    const weather_data = await getWeatherByPlaceId(result.place_id);
+
+    const poi_data = await getPOIByPlaceId(result.place_id);
+
+    //TODO chỉnh lại cái này
+    return res.status(200).json({
+      // status: "success",
+      place: result,
+      availableHotel: hotels,
+      weather_data: weather_data,
+      pois: poi_data,
+    });
+  } catch (err) {
+    console.error("Error fetching place:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+exports.getPlaceById = async (req, res, next) => {
+  try {
+    const place = await Place.findByPk(req.params.id);
+    res.json({
+      status: "success",
+      content: place ? place : "Place not found",
+    });
+  } catch (err) {
+    console.error("Error fetching places:", err);
+  }
+};
+
 exports.getPlaceFilters = async (req, res) => {
   try {
     const countries = await getDistinctCountry();
@@ -585,3 +571,21 @@ exports.getPlaceImages = async (req, res) => {
     res.status(500).json({ status: "error", message: error.message });
   }
 };
+
+const getDistinctCountry = async () => {
+  try {
+    const raw_data = await Place.findAll({
+      attributes: [
+        [Sequelize.fn("DISTINCT", Sequelize.col("country")), "country"],
+      ],
+    });
+
+    const countries = raw_data ? raw_data.map((place) => place.country) : [];
+    return countries;
+  } catch (err) {
+    console.error("Error fetching distinct countries:", err);
+  }
+};
+
+/*Post function*/
+

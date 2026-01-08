@@ -1,5 +1,15 @@
 const { User } = require("../models");
 
+const validateUsername = (username) => {
+  const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+  return usernameRegex.test(username);
+};
+
+const validatePassword = (password) => {
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[^\s]{8,}$/;
+  return passwordRegex.test(password);
+};
+
 // Get all users
 exports.getAllUsers = async (req, res, next) => {
   try {
@@ -40,9 +50,23 @@ exports.createUser = async (req, res, next) => {
         .json({ error: "Username and password are required" });
     }
 
+    if (!validateUsername(username)) {
+      return res.status(400).json({
+        error:
+          "Username must be 3–20 characters and contain only letters, numbers, and underscores",
+      });
+    }
+
+    if (!validatePassword(password)) {
+      return res.status(400).json({
+        error:
+          "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character",
+      });
+    }
+
     const user = await User.create({
       username,
-      hashed_password: password, 
+      hashed_password: password,
     });
 
     const { hashed_password, ...userSafe } = user.get({ plain: true });
@@ -55,7 +79,6 @@ exports.createUser = async (req, res, next) => {
     next(err);
   }
 };
-
 
 // Update user
 exports.updateUser = async (req, res, next) => {

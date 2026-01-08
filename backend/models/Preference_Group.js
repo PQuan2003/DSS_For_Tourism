@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
   class Preference_Group extends Model {
     static associate(models) {
       Preference_Group.belongsTo(models.User, { foreignKey: "user_id" });
+      
       Preference_Group.hasMany(models.User_Preference, {
         foreignKey: "preference_group",
       });
