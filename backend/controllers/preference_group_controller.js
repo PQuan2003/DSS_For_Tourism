@@ -40,3 +40,45 @@ exports.getPreferenceGroupByID = async (req, res, next) => {
     });
   }
 };
+
+exports.insertNewPreferenceGroup = async (
+  user_id,
+  userBudget,
+  totalTravelDays,
+  user_scenery_requirement,
+  user_activity_preference,
+  user_weather_preference,
+  travel_month,
+  weights
+) => {
+  try {
+    // console.log(
+    //   "aaaaaaaaaaaaaaaaaaaa",
+    //   user_id,
+    //   userBudget,
+    //   totalTravelDays,
+    //   user_scenery_requirement,
+    //   user_activity_preference,
+    //   user_weather_preference,
+    //   travel_month,
+    //   weights
+    // );
+    const preference_group = await Preference_Group.create({
+      user_id,
+      preferences: {
+        weights,
+        budget: userBudget,
+        weather: user_weather_preference,
+        scenery_requirement: user_scenery_requirement,
+        activity_requirement: user_activity_preference,
+        total_travel_days: totalTravelDays,
+        travel_month,
+      },
+    });
+
+    return preference_group;
+  } catch (err) {
+    console.error("Error creating preference_group:", err);
+    throw err;
+  }
+};

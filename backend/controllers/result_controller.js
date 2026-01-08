@@ -1,7 +1,7 @@
 const { Result, Place } = require("../models");
 const { handleCalculateAHP } = require("../utils/handleCalculateAHP");
 const { validate_number } = require("../utils/validate_number");
-
+const { insertNewPreferenceGroup } = require("./preference_group_controller");
 
 exports.getAllResult = async (req, res, next) => {
   try {
@@ -38,9 +38,30 @@ exports.getResultById = async (req, res, next) => {
   }
 };
 
+exports.getResultByUser = async (req, res, next) => {
+  try {
+    const result = await Result.findAll({
+      where: { user_id: req.params.user_id },
+      order: [["createdAt", "DESC"]], 
+    });
+    res.json({
+      status: "success",
+      content: result ? result : "result  not found",
+    });
+  } catch (err) {
+    console.error("Error fetching results:", err);
+
+    res.status(500).json({
+      status: "failed",
+      content: err.message || "Something went wrong while fetching result",
+    });
+  }
+};
+
 exports.createNewResult = async (req, res) => {
   try {
     let {
+      userName = "Guest",
       userBudget = 0,
       totalTravelDays = 0,
       user_scenery_requirement = [],
@@ -134,6 +155,23 @@ exports.createNewResult = async (req, res) => {
     );
 
     scorings.sort((a, b) => b.total_score - a.total_score);
+
+    const preferenceGroup = await insertNewPreferenceGroup(
+      1,
+      userBudget,
+      totalTravelDays,
+      user_scenery_requirement,
+      user_activity_preference,
+      user_weather_preference,
+      travel_month,
+      weights
+    );
+
+    await Result.create({
+      user_id: 1,
+      preference_group_id: preferenceGroup.group_id,
+      top_place_name: scorings[0].place_name,
+    });
 
     res.json({
       status: "success",

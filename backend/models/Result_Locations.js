@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true,
       },
       result_id: DataTypes.INTEGER,
-      place_id: DataTypes.INTEGER,
+      top_place_name: DataTypes.STRING,
     },
     {
       sequelize,
