@@ -1,7 +1,35 @@
 const { Result, Place } = require("../models");
 const { handleCalculateAHP } = require("../utils/handleCalculateAHP");
 const { validate_number } = require("../utils/validate_number");
-const { insertNewPreferenceGroup } = require("./preference_group_controller");
+// const { insertNewPreferenceGroup } = require("./preference_group_controller");
+
+const insertNewResult = async (
+  user_id,
+  userBudget,
+  totalTravelDays,
+  user_scenery_requirement,
+  user_activity_preference,
+  user_weather_preference,
+  travel_month,
+  weights,
+  top_location
+) => {
+  try {
+    await Result.create({
+      user_id: user_id,
+      top_location: top_location,
+      preferences: {
+        weights,
+        budget: userBudget,
+        weather: user_weather_preference,
+        scenery_requirement: user_scenery_requirement,
+        activity_requirement: user_activity_preference,
+        total_travel_days: totalTravelDays,
+        travel_month,
+      },
+    });
+  } catch {}
+};
 
 exports.getAllResult = async (req, res, next) => {
   try {
@@ -42,7 +70,7 @@ exports.getResultByUser = async (req, res, next) => {
   try {
     const result = await Result.findAll({
       where: { user_id: req.params.user_id },
-      order: [["createdAt", "DESC"]], 
+      order: [["createdAt", "DESC"]],
     });
     res.json({
       status: "success",
@@ -156,7 +184,7 @@ exports.createNewResult = async (req, res) => {
 
     scorings.sort((a, b) => b.total_score - a.total_score);
 
-    const preferenceGroup = await insertNewPreferenceGroup(
+    await insertNewResult(
       1,
       userBudget,
       totalTravelDays,
@@ -164,14 +192,15 @@ exports.createNewResult = async (req, res) => {
       user_activity_preference,
       user_weather_preference,
       travel_month,
-      weights
+      weights,
+      scorings[0].place_name
     );
 
-    await Result.create({
-      user_id: 1,
-      preference_group_id: preferenceGroup.group_id,
-      top_place_name: scorings[0].place_name,
-    });
+    // await Result.create({
+    //   user_id: 1,
+    //   preference_group_id: preferenceGroup.group_id,
+    //   top_place_name: scorings[0].place_name,
+    // });
 
     res.json({
       status: "success",

@@ -4,7 +4,7 @@ const Preference_Group = require("../controllers/preference_group_controller");
 
 // CRUD endpoints
 router.get("/", Preference_Group.getAllPreferenceGroup);
-router.get("/:id", Preference_Group.getPreferenceGroupByID);
+router.get("/:id", Preference_Group.getPreferenceGroupByUserID);
 
 // router.post("/", Preference_Group.createPlace);
 // router.put("/:id", Preference_Group.updatePlace);

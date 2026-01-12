@@ -12,31 +12,6 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
-  //   Preference_Group.init(
-  //     {
-  //       group_id: {
-  //         type: DataTypes.INTEGER,
-  //         primaryKey: true,
-  //         autoIncrement: true,
-  //       },
-  //       user_id: {
-  //         type: DataTypes.INTEGER,
-  //         allowNull: false,
-  //       },
-  //     },
-  //     {
-  //       sequelize,
-  //       modelName: "Preference_Group",
-  //       tableName: "Preference_Groups",
-  //       timestamps: true,
-  //       createdAt: "created_at",
-  //       updatedAt: false,
-  //     }
-  //   );
-
-  //   return Preference_Group;
-  // };
-
   Preference_Group.init(
     {
       group_id: {

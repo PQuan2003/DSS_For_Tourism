@@ -371,7 +371,6 @@ exports.calculateIndividualPlaceWeatherScore = async (req, res) => {
   }
 };
 
-
 /*Get function*/
 exports.getDistictPlaceTags = async () => {
   try {
@@ -588,4 +587,78 @@ const getDistinctCountry = async () => {
 };
 
 /*Post function*/
+exports.createPlace = async (req, res) => {
+  const {
+    place_name,
+    country,
+    avg_cost_per_day,
+    money_unit,
+    tourist_density,
+    place_description,
+    tags,
+  } = req.body;
 
+  if (!place_name || typeof place_name !== "string") {
+    return res
+      .status(400)
+      .json({ error: "place_name is required and must be a string" });
+  }
+
+  if (!country || typeof country !== "string") {
+    return res
+      .status(400)
+      .json({ error: "country is required and must be a string" });
+  }
+
+  if (!money_unit || typeof money_unit !== "string") {
+    return res
+      .status(400)
+      .json({ error: "money_unit is required and must be a string" });
+  }
+
+  if (
+    avg_cost_per_day === undefined ||
+    avg_cost_per_day === null ||
+    isNaN(avg_cost_per_day) ||
+    Number(avg_cost_per_day) <= 0
+  ) {
+    return res.status(400).json({
+      error: "avg_cost_per_day must be a positive number",
+    });
+  }
+
+  const allowedDensity = ["low", "medium", "high"];
+  if (!allowedDensity.includes(tourist_density)) {
+    return res.status(400).json({
+      error: "tourist_density must be one of: low, medium, high",
+    });
+  }
+
+  if (tags !== undefined) {
+    if (!Array.isArray(tags)) {
+      return res.status(400).json({
+        error: "tags must be an array of strings",
+      });
+    }
+
+    const invalidTag = tags.find(
+      (t) => typeof t !== "string" || t.trim() === ""
+    );
+
+    if (invalidTag) {
+      return res.status(400).json({
+        error: "each tag must be a non-empty string",
+      });
+    }
+  }
+
+  const place = await Place.create({
+    place_name: place_name,
+    country: country,
+    avg_cost_per_day: avg_cost_per_day,
+    money_unit: money_unit,
+    tourist_density: tourist_density,
+    place_description: place_description,
+    tags: tags,
+  });
+};

@@ -25,7 +25,7 @@ router.use("/poi_activities", require("./poi_activity_routes"));
 /**
  * Recommendation & Results
  */
-router.use("/preference_groups", require("./preference_group_routes"));
+// router.use("/preference_groups", require("./preference_group_routes"));
 router.use("/results", require("./result_routes"));
 router.use("/result_locations", require("./result_location_routes"));
 

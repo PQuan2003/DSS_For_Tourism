@@ -1,1 +1,7 @@
 đã lm: handle lưu lại lịch sử
+
+
+cần:
+post save history 
+get history (all)
+get history (userID)

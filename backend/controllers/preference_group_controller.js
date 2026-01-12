@@ -1,3 +1,4 @@
+const { where } = require("sequelize");
 const { Preference_Group } = require("../models");
 
 // Get all users
@@ -21,9 +22,12 @@ exports.getAllPreferenceGroup = async (req, res, next) => {
 };
 
 // Get user by ID
-exports.getPreferenceGroupByID = async (req, res, next) => {
+exports.getPreferenceGroupByUserID = async (req, res, next) => {
   try {
-    const preference_group = await Preference_Group.findByPk(req.params.id);
+    const { user_id } = req.body;
+    const preference_group = await Preference_Group.findall({
+      where: { user_id: req.params.user_id },
+    });
     res.json({
       status: "success",
       content: preference_group
@@ -52,17 +56,6 @@ exports.insertNewPreferenceGroup = async (
   weights
 ) => {
   try {
-    // console.log(
-    //   "aaaaaaaaaaaaaaaaaaaa",
-    //   user_id,
-    //   userBudget,
-    //   totalTravelDays,
-    //   user_scenery_requirement,
-    //   user_activity_preference,
-    //   user_weather_preference,
-    //   travel_month,
-    //   weights
-    // );
     const preference_group = await Preference_Group.create({
       user_id,
       preferences: {
