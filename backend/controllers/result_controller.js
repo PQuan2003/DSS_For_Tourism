@@ -1,6 +1,7 @@
 const { Result, Place } = require("../models");
 const { handleCalculateAHP } = require("../utils/handleCalculateAHP");
 const { validate_number } = require("../utils/validate_number");
+const { Op, fn, col, literal } = require("sequelize");
 // const { insertNewPreferenceGroup } = require("./preference_group_controller");
 
 const insertNewResult = async (
@@ -12,12 +13,12 @@ const insertNewResult = async (
   user_weather_preference,
   travel_month,
   weights,
-  top_location
+  place_id
 ) => {
   try {
     await Result.create({
       user_id: user_id,
-      top_location: top_location,
+      place_id: place_id,
       preferences: {
         weights,
         budget: userBudget,
@@ -86,10 +87,75 @@ exports.getResultByUser = async (req, res, next) => {
   }
 };
 
+exports.getAllResultToday = async (req, res, next) => {
+  try {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const result = await Result.findAll({
+      where: {
+        createdAt: {
+          [Op.gte]: startOfToday,
+        },
+      },
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.json({
+      status: "success",
+      content: result,
+    });
+  } catch (err) {
+    console.error("Error fetching result:", err);
+
+    res.status(500).json({
+      status: "failed",
+      content: err.message || "Something went wrong while fetching results",
+    });
+  }
+};
+
+exports.getPopularPlaces = async (req, res) => {
+  try {
+    const lists = await Place.findAll({
+      attributes: [
+        "place_id",
+        "place_name",
+        "country",
+        "place_img",
+        "avg_cost_per_day",
+        [fn("COUNT", col("Results.result_id")), "appearance_count"],
+      ],
+      include: [
+        {
+          model: Result,
+          attributes: [],
+          required: false, 
+        },
+      ],
+      group: ["Place.place_id"],
+      order: [
+        [literal("appearance_count"), "DESC"],
+        ["place_name", "ASC"],
+      ],
+    });
+
+    res.json({
+      status: "success",
+      content: lists,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "failed",
+      content: err.message,
+    });
+  }
+};
+
 exports.createNewResult = async (req, res) => {
   try {
     let {
-      userName = "Guest",
       userBudget = 0,
       totalTravelDays = 0,
       user_scenery_requirement = [],
@@ -165,13 +231,7 @@ exports.createNewResult = async (req, res) => {
         return {
           place_id: place.place_id,
           place_name: place.place_name,
-          total_score:
-            hasWeights && ahp_weights
-              ? budget_score * ahp_weights.budget +
-                scenery_score * ahp_weights.scenery +
-                activity_score * ahp_weights.activity +
-                weather_score * ahp_weights.weather
-              : budget_score + scenery_score + activity_score + weather_score,
+          total_score: total_score,
           detailed_scores: {
             budget_score,
             scenery_score,
@@ -185,7 +245,7 @@ exports.createNewResult = async (req, res) => {
     scorings.sort((a, b) => b.total_score - a.total_score);
 
     await insertNewResult(
-      1,
+      2,
       userBudget,
       totalTravelDays,
       user_scenery_requirement,
@@ -193,7 +253,7 @@ exports.createNewResult = async (req, res) => {
       user_weather_preference,
       travel_month,
       weights,
-      scorings[0].place_name
+      scorings[0].place_id
     );
 
     // await Result.create({

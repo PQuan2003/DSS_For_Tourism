@@ -42,14 +42,15 @@ exports.getUserById = async (req, res, next) => {
 
 exports.createUser = async (req, res, next) => {
   try {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
+    console.log(username, email, password);
 
-    if (!username || !password) {
+    if (!username || !password || !email) {
       return res
         .status(400)
-        .json({ error: "Username and password are required" });
+        .json({ error: "Please fill in all fields" });
     }
-
+    
     if (!validateUsername(username)) {
       return res.status(400).json({
         error:
@@ -65,7 +66,8 @@ exports.createUser = async (req, res, next) => {
     }
 
     const user = await User.create({
-      username,
+      username: username,
+      email: email,
       hashed_password: password,
     });
 

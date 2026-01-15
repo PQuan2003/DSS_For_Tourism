@@ -11,7 +11,7 @@ router.get("/", (req, res) => {
  */
 router.use("/auth", require("./auth_route"));
 router.use("/users", require("./user_routes"));
-router.use("/user_preferences", require("./user_preference_routes"));
+// router.use("/user_preferences", require("./user_preference_routes"));
 
 /**
  * Core Resources
@@ -25,9 +25,7 @@ router.use("/poi_activities", require("./poi_activity_routes"));
 /**
  * Recommendation & Results
  */
-// router.use("/preference_groups", require("./preference_group_routes"));
 router.use("/results", require("./result_routes"));
-router.use("/result_locations", require("./result_location_routes"));
 
 /**
  * Supporting Resources

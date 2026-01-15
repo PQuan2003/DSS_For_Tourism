@@ -1,4 +1,5 @@
 import { useLocation, Link, useNavigate } from 'react-router-dom'
+import { isLoggedIn, logout } from '@/utils/auth_util'
 
 import {
     NavigationMenu,
@@ -14,6 +15,7 @@ import { Button } from '../ui/button'
 
 import { Moon, Sun } from 'lucide-react'
 import { useState } from 'react'
+import UserDropDown from '../UserDropDown'
 
 
 export function NavBar({ ...props }) {
@@ -33,12 +35,17 @@ export function NavBar({ ...props }) {
         },
     ]
 
+    const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem("token"));
+
+
     const location = useLocation();
     const [isDark, setIsDark] = useState(false)
 
     const handleButtonClick = (url) => {
         navigate(`/${url}`)
     }
+
+    console.log(loggedIn)
 
     return (
         <NavigationMenu className="sticky top-0 bg-gray-100">
@@ -63,24 +70,22 @@ export function NavBar({ ...props }) {
                             )
                         })}
                     </div>
-                    {/* <div className='flex'>
-                        <Button className='rounded-2xl' onClick={() => handleButtonClick("login")}>Login</Button>
-                        <Button className='rounded-2xl ml-4' onClick={() => handleButtonClick("signup")}>Sign Up</Button>
+                    <div className='flex'>
                         <Button className='rounded-2xl ml-4' onClick={() => setIsDark(!isDark)}>
                             {isDark ? <Moon /> : <Sun />}
                         </Button>
-                    </div> */}
+                        {!loggedIn
+                            ?
+                            <>
+                                <Button className='rounded-2xl ml-1' onClick={() => handleButtonClick("login")}>Login</Button>
+                                <Button className='rounded-2xl ml-1' onClick={() => handleButtonClick("signup")}>Sign Up</Button>
+                            </>
+                            : <UserDropDown setLoggedIn={setLoggedIn} />
+                        }
+
+                    </div>
                 </div>
             </NavigationMenuList>
         </NavigationMenu>
     )
 }
-
-
-
-
-{/* <NavigationMenuItem>
-    <NavigationMenuTrigger>Item One</NavigationMenuTrigger>
-    <NavigationMenuContent >
-    </NavigationMenuContent>
-    </NavigationMenuItem> */}

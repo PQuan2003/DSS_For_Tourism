@@ -10,43 +10,87 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
+import { useNavigate } from "react-router-dom";
+
 
 export function LoginForm({
   className,
   ...props
 }) {
-  const [email, setEmail] = useState("")
+  const [username, setUserName] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handelEmailChange = (email) => {
-    setEmail(email)
+  const navigate = useNavigate();
+
+
+  const handleUserNameChange = (email) => {
+    setUserName(email)
   }
 
   const handleSetPassword = (pw) => {
     setPassword(pw)
   }
 
-  const handleSubmitForm = (e) => {
-    e.preventDefault()
-    console.log(email)
-    console.log(password)
-  }
+  const handleSubmitForm = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
+    try {
+      console.log("running login")
+      const res = await fetch("http://localhost:8080/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: username, // backend expects `username`
+          password,
+        }),
+      });
+
+      const data = await res.json();
+      console.log(data)
+
+      if (!res.ok) {
+        throw new Error(data.error || "Login failed");
+      }
+      localStorage.setItem("token", data.token);
+
+      console.log("Login success:", data);
+
+      // 👉 optional: redirect
+      // window.location.href = "/dashboard";
+      navigate("/")
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    } 
+  };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Enter your username below to login to your account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" required onChange={(e) => handelEmailChange(e.target.value)} />
+                <Label htmlFor="username">User name</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="your_username"
+                  required
+                  onChange={(e) => handleUserNameChange(e.target.value)}
+                />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
@@ -65,9 +109,22 @@ export function LoginForm({
             </div>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}
-              <a href="#" className="underline underline-offset-4">
+              <span
+                onClick={() => navigate("/signup")}
+                className="underline underline-offset-4 cursor-pointer text-primary"
+              >
                 Sign up
-              </a>
+              </span>
+            </div>
+
+            <div className="mt-4 text-center text-sm">
+              Go back?{" "}
+              <span
+                onClick={() => navigate("/")}
+                className="underline underline-offset-4 cursor-pointer text-primary"
+              >
+                Homepage
+              </span>
             </div>
           </form>
         </CardContent>

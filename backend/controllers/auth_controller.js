@@ -36,6 +36,13 @@ exports.login = async (req, res) => {
       { expiresIn: "6h" }
     );
 
+    // res.cookie("token", token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: "strict",
+    //   maxAge: 6 * 60 * 60 * 1000, // 6 hours
+    // });
+
     res.json({
       message: "Login successful",
       token,
@@ -43,4 +50,8 @@ exports.login = async (req, res) => {
   } catch (err) {
     next(err);
   }
+};
+
+exports.logout = (req, res) => {
+  res.json({ message: "Logged out" });
 };

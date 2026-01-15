@@ -8,6 +8,9 @@ module.exports = (sequelize, DataTypes) => {
       Place.hasMany(models.POI, { foreignKey: "place_id" });
       Place.hasMany(models.Hotel, { foreignKey: "place_id" });
       Place.hasOne(models.Weather_Conditions, { foreignKey: "place_id" });
+      Place.hasMany(models.Result, {
+        foreignKey: "place_id",
+      });
     }
 
     calculatedBudgetPoint(userBudget, totalTravelDays) {
@@ -52,7 +55,7 @@ module.exports = (sequelize, DataTypes) => {
 
         // Under budget with smaller difference
         const ratio = percentageDiff / underTolerance;
-        score = 0.5 + 0.5 * ratio ** 0.5; // sqrt curve 
+        score = 0.5 + 0.5 * ratio ** 0.5; // sqrt curve
         score = Math.min(score, 1);
       }
       return {
@@ -99,11 +102,11 @@ module.exports = (sequelize, DataTypes) => {
       }
 
       const matchesCount = matchedSet.size;
-      if (matchesCount === 0) return 0; // no match 
-      if (matchesCount === 1) return 0.5; // one match 
+      if (matchesCount === 0) return 0; // no match
+      if (matchesCount === 1) return 0.5; // one match
 
       const bias = 0.1;
-    
+
       let score = 0.5 + bias * (matchesCount - 1);
       if (score > 1) score = 1;
 
@@ -239,7 +242,6 @@ module.exports = (sequelize, DataTypes) => {
       avg_cost_per_day: DataTypes.FLOAT,
       place_description: DataTypes.TEXT,
       place_img: DataTypes.STRING,
-      // tags: DataTypes.STRING,
       tags: {
         type: DataTypes.JSON,
         allowNull: true,
@@ -273,6 +275,7 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "Place",
       tableName: "Places",
       timestamps: true,
+      paranoid: true,
     }
   );
 

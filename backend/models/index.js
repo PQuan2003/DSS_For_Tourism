@@ -42,9 +42,11 @@ fs.readdirSync(__dirname)
         sequelize,
         Sequelize.DataTypes
       );
+      // console.log("Loaded models:", Object.keys(db));
+
       db[model.name] = model;
     } catch (error) {
-      console.error(`❌ Failed to load model ${file}:`, err);
+      console.error(`❌ Failed to load model ${file}:`, error);
     }
   });
 

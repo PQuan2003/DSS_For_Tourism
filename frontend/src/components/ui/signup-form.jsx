@@ -14,8 +14,75 @@ import {
     FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { useNavigate } from "react-router-dom";
+import { useState } from "react"
+
 
 export function SignupForm({ className, ...props }) {
+    const navigate = useNavigate();
+
+    const [username, setUserName] = useState("")
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [error, setError] = useState("");
+
+    const handleFormSubmit = async (e) => {
+        e.preventDefault();
+        console.log("in handle")
+        setError("");
+
+        if (password !== confirmPassword) {
+            return setError("Passwords do not match");
+        }
+        console.log("trying to create new user")
+        try {
+            const res = await fetch("http://localhost:8080/users", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    username: username,
+                    email: email,
+                    password: password,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.error || "Signup failed");
+                return;
+            }
+
+            const res_login = await fetch("http://localhost:8080/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    username: username, 
+                    password,
+                }),
+            });
+
+            const res_data = await res_login.json();
+            console.log(res_data)
+
+            if (!res.ok) {
+                throw new Error(data.error || "Login failed");
+            }
+
+            localStorage.setItem("token", res_data.token);
+
+            console.log("Login success:", res_data);
+
+            navigate("/");
+        } catch (err) {
+            setError(err);
+        }
+    }
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
@@ -26,11 +93,17 @@ export function SignupForm({ className, ...props }) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form>
+                    <form onSubmit={(e) => handleFormSubmit(e)}>
                         <FieldGroup>
                             <Field>
-                                <FieldLabel htmlFor="name">Full Name</FieldLabel>
-                                <Input id="name" type="text" placeholder="John Doe" required />
+                                <FieldLabel htmlFor="name">User name</FieldLabel>
+                                <Input
+                                    id="name"
+                                    type="text"
+                                    placeholder="John Doe"
+                                    onChange={(e) => setUserName(e.target.value)}
+                                    required
+                                />
                             </Field>
 
                             <Field>
@@ -39,6 +112,7 @@ export function SignupForm({ className, ...props }) {
                                     id="email"
                                     type="email"
                                     placeholder="m@example.com"
+                                    onChange={(e) => setEmail(e.target.value)}
                                     required
                                 />
                             </Field>
@@ -47,13 +121,21 @@ export function SignupForm({ className, ...props }) {
                                 <Field className="grid grid-cols-2 gap-4">
                                     <Field>
                                         <FieldLabel htmlFor="password">Password</FieldLabel>
-                                        <Input id="password" type="password" required />
+                                        <Input
+                                            id="password"
+                                            type="password"
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required />
                                     </Field>
                                     <Field>
                                         <FieldLabel htmlFor="confirm-password">
                                             Confirm Password
                                         </FieldLabel>
-                                        <Input id="confirm-password" type="password" required />
+                                        <Input
+                                            id="confirm-password"
+                                            type="password"
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            required />
                                     </Field>
                                 </Field>
                                 <FieldDescription>
@@ -61,10 +143,21 @@ export function SignupForm({ className, ...props }) {
                                 </FieldDescription>
                             </Field>
 
+                            {error && (
+                                <FieldDescription className="text-red-500">
+                                    {error}
+                                </FieldDescription>
+                            )}
+
                             <Field>
                                 <Button type="submit">Create Account</Button>
                                 <FieldDescription className="text-center">
-                                    Already have an account? <a href="#">Sign in</a>
+                                    Already have an account? <span
+                                        onClick={() => navigate("/login")}
+                                        className="underline underline-offset-4 cursor-pointer text-primary"
+                                    >
+                                        Sign up
+                                    </span>
                                 </FieldDescription>
                             </Field>
                         </FieldGroup>

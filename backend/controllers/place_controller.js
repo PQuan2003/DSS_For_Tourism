@@ -588,77 +588,221 @@ const getDistinctCountry = async () => {
 
 /*Post function*/
 exports.createPlace = async (req, res) => {
-  const {
-    place_name,
-    country,
-    avg_cost_per_day,
-    money_unit,
-    tourist_density,
-    place_description,
-    tags,
-  } = req.body;
+  try {
+    let {
+      place_name,
+      country,
+      avg_cost_per_day,
+      money_unit,
+      tourist_density,
+      place_description,
+      tags,
+    } = req.body;
 
-  if (!place_name || typeof place_name !== "string") {
-    return res
-      .status(400)
-      .json({ error: "place_name is required and must be a string" });
-  }
+    if (!place_name || typeof place_name !== "string") {
+      return res
+        .status(400)
+        .json({ error: "place_name is required and must be a string" });
+    }
 
-  if (!country || typeof country !== "string") {
-    return res
-      .status(400)
-      .json({ error: "country is required and must be a string" });
-  }
+    if (!country || typeof country !== "string") {
+      return res
+        .status(400)
+        .json({ error: "country is required and must be a string" });
+    }
 
-  if (!money_unit || typeof money_unit !== "string") {
-    return res
-      .status(400)
-      .json({ error: "money_unit is required and must be a string" });
-  }
+    if (!money_unit || typeof money_unit !== "string") {
+      return res
+        .status(400)
+        .json({ error: "money_unit is required and must be a string" });
+    }
 
-  if (
-    avg_cost_per_day === undefined ||
-    avg_cost_per_day === null ||
-    isNaN(avg_cost_per_day) ||
-    Number(avg_cost_per_day) <= 0
-  ) {
-    return res.status(400).json({
-      error: "avg_cost_per_day must be a positive number",
-    });
-  }
-
-  const allowedDensity = ["low", "medium", "high"];
-  if (!allowedDensity.includes(tourist_density)) {
-    return res.status(400).json({
-      error: "tourist_density must be one of: low, medium, high",
-    });
-  }
-
-  if (tags !== undefined) {
-    if (!Array.isArray(tags)) {
+    if (
+      avg_cost_per_day === undefined ||
+      avg_cost_per_day === null ||
+      isNaN(avg_cost_per_day) ||
+      Number(avg_cost_per_day) <= 0
+    ) {
       return res.status(400).json({
-        error: "tags must be an array of strings",
+        error: "avg_cost_per_day must be a positive number",
       });
     }
 
-    const invalidTag = tags.find(
-      (t) => typeof t !== "string" || t.trim() === ""
-    );
-
-    if (invalidTag) {
+    const allowedDensity = ["low", "medium", "high"];
+    if (!allowedDensity.includes(tourist_density)) {
       return res.status(400).json({
-        error: "each tag must be a non-empty string",
+        error: "tourist_density must be one of: low, medium, high",
       });
     }
-  }
 
-  const place = await Place.create({
-    place_name: place_name,
-    country: country,
-    avg_cost_per_day: avg_cost_per_day,
-    money_unit: money_unit,
-    tourist_density: tourist_density,
-    place_description: place_description,
-    tags: tags,
-  });
+    if (tags !== undefined) {
+      if (!Array.isArray(tags)) {
+        return res.status(400).json({
+          error: "tags must be an array of strings",
+        });
+      }
+
+      const invalidTag = tags.find(
+        (t) => typeof t !== "string" || t.trim() === ""
+      );
+
+      if (invalidTag) {
+        return res.status(400).json({
+          error: "each tag must be a non-empty string",
+        });
+      }
+    }
+
+    const place = await Place.create({
+      place_name: place_name,
+      country: country,
+      avg_cost_per_day: avg_cost_per_day,
+      money_unit: money_unit,
+      tourist_density: tourist_density,
+      place_description: place_description,
+      tags: tags,
+    });
+
+    return res.status(201).json({
+      status: "success",
+      message: "Place added successfully",
+      data: place,
+    });
+  } catch (err) {
+    console.error("Error creating place:", err);
+    return res.status(500).json({
+      status: "failed",
+      error: "Internal server error",
+    });
+  }
+};
+
+/*Patch function*/
+exports.updatePlace = async (req, res) => {
+  try {
+    const { placeId } = req.params;
+
+    const {
+      avg_cost_per_day,
+      money_unit,
+      tourist_density,
+      place_description,
+      tags,
+    } = req.body;
+
+    const place = await Place.findByPk(placeId);
+
+    if (!place) {
+      return res.status(404).json({
+        status: "failed",
+        error: "Place not found",
+      });
+    }
+
+    const updateData = {};
+
+    if (avg_cost_per_day !== undefined) {
+      if (
+        avg_cost_per_day === null ||
+        isNaN(avg_cost_per_day) ||
+        Number(avg_cost_per_day) <= 0
+      ) {
+        return res.status(400).json({
+          error: "avg_cost_per_day must be a positive number",
+        });
+      }
+      updateData.avg_cost_per_day = avg_cost_per_day;
+    }
+
+    if (money_unit !== undefined) {
+      if (typeof money_unit !== "string") {
+        return res.status(400).json({
+          error: "money_unit must be a string",
+        });
+      }
+      updateData.money_unit = money_unit;
+    }
+
+    if (tourist_density !== undefined) {
+      const allowedDensity = ["low", "medium", "high"];
+      if (!allowedDensity.includes(tourist_density)) {
+        return res.status(400).json({
+          error: "tourist_density must be one of: low, medium, high",
+        });
+      }
+      updateData.tourist_density = tourist_density;
+    }
+
+    if (place_description !== undefined) {
+      updateData.place_description = place_description;
+    }
+
+    if (tags !== undefined) {
+      if (!Array.isArray(tags)) {
+        return res.status(400).json({
+          error: "tags must be an array of strings",
+        });
+      }
+
+      const invalidTag = tags.find(
+        (t) => typeof t !== "string" || t.trim() === ""
+      );
+
+      if (invalidTag) {
+        return res.status(400).json({
+          error: "each tag must be a non-empty string",
+        });
+      }
+
+      updateData.tags = tags;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        error: "No valid fields provided for update",
+      });
+    }
+
+    await place.update(updateData);
+
+    return res.status(200).json({
+      status: "success",
+      message: "Place updated successfully",
+      data: place,
+    });
+  } catch (err) {
+    console.error("Error updating place:", err);
+    return res.status(500).json({
+      status: "failed",
+      error: "Internal server error",
+    });
+  }
+};
+
+/*Delete function*/
+exports.deletePlace = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const place = await Place.findByPk(id);
+
+    if (!place) {
+      return res.status(404).json({
+        status: "failed",
+        error: "Place not found",
+      });
+    }
+
+    await place.destroy();
+    return res.status(200).json({
+      status: "success",
+      message: "Place deleted successfully",
+    });
+  } catch (err) {
+    console.error("Error deleting place:", err);
+    return res.status(500).json({
+      status: "failed",
+      error: "Internal server error",
+    });
+  }
 };
