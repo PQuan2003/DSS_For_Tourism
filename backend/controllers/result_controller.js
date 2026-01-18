@@ -1,11 +1,11 @@
-const { Result, Place } = require("../models");
+const { Result, Place, User } = require("../models");
 const { handleCalculateAHP } = require("../utils/handleCalculateAHP");
 const { validate_number } = require("../utils/validate_number");
 const { Op, fn, col, literal } = require("sequelize");
 // const { insertNewPreferenceGroup } = require("./preference_group_controller");
 
 const insertNewResult = async (
-  user_id,
+  userId,
   userBudget,
   totalTravelDays,
   user_scenery_requirement,
@@ -13,11 +13,11 @@ const insertNewResult = async (
   user_weather_preference,
   travel_month,
   weights,
-  place_id
+  place_id,
 ) => {
   try {
     await Result.create({
-      user_id: user_id,
+      user_id: userId,
       place_id: place_id,
       preferences: {
         weights,
@@ -34,7 +34,20 @@ const insertNewResult = async (
 
 exports.getAllResult = async (req, res, next) => {
   try {
-    const result = await Result.findAll();
+    const result = await Result.findAll({
+      order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: User,
+          attributes: ["username"],
+        },
+        {
+          model: Place,
+
+          attributes: ["place_name"],
+        },
+      ],
+    });
 
     res.json({
       status: "success",
@@ -89,16 +102,29 @@ exports.getResultByUser = async (req, res, next) => {
 
 exports.getAllResultToday = async (req, res, next) => {
   try {
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
+    const VN_OFFSET = 7 * 60 * 60 * 1000;
+
+    const now = new Date();
+
+    const startOfTodayVN = new Date(
+      new Date(now.getTime() + VN_OFFSET).setHours(0, 0, 0, 0) - VN_OFFSET,
+    );
+
+    const endOfTodayVN = new Date(
+      new Date(now.getTime() + VN_OFFSET).setHours(23, 59, 59, 999) - VN_OFFSET,
+    );
 
     const result = await Result.findAll({
       where: {
         createdAt: {
-          [Op.gte]: startOfToday,
+          [Op.between]: [startOfTodayVN, endOfTodayVN],
         },
       },
       order: [["createdAt", "DESC"]],
+      include: [
+        { model: User, attributes: ["username"] },
+        { model: Place, attributes: ["place_name"] },
+      ],
     });
 
     res.json({
@@ -107,10 +133,9 @@ exports.getAllResultToday = async (req, res, next) => {
     });
   } catch (err) {
     console.error("Error fetching result:", err);
-
     res.status(500).json({
       status: "failed",
-      content: err.message || "Something went wrong while fetching results",
+      content: err.message,
     });
   }
 };
@@ -122,15 +147,18 @@ exports.getPopularPlaces = async (req, res) => {
         "place_id",
         "place_name",
         "country",
-        "place_img",
         "avg_cost_per_day",
+        "money_unit",
+        "tourist_density",
+        "place_description",
+        "place_img",
         [fn("COUNT", col("Results.result_id")), "appearance_count"],
       ],
       include: [
         {
           model: Result,
           attributes: [],
-          required: false, 
+          required: false,
         },
       ],
       group: ["Place.place_id"],
@@ -156,6 +184,7 @@ exports.getPopularPlaces = async (req, res) => {
 exports.createNewResult = async (req, res) => {
   try {
     let {
+      userId = null,
       userBudget = 0,
       totalTravelDays = 0,
       user_scenery_requirement = [],
@@ -193,32 +222,32 @@ exports.createNewResult = async (req, res) => {
       places.map(async (place) => {
         const { score: raw_budget_score } = await place.calculatedBudgetPoint(
           userBudget,
-          totalTravelDays
+          totalTravelDays,
         );
         const budget_score = validate_number(raw_budget_score, "budget_score");
 
         const raw_scenery_score = await place.calculatedSceneryPoint(
-          user_scenery_requirement
+          user_scenery_requirement,
         );
         const scenery_score = validate_number(
           raw_scenery_score,
-          "scenery_score"
+          "scenery_score",
         );
 
         const { score: raw_activity_score } =
           await place.calculatedActivityPoint(user_activity_preference);
         const activity_score = validate_number(
           raw_activity_score,
-          "activity_score"
+          "activity_score",
         );
 
         const { score: raw_weather_score } = await place.calculatedWeatherPoint(
           user_weather_preference,
-          travel_month
+          travel_month,
         );
         const weather_score = validate_number(
           raw_weather_score,
-          "weather_score"
+          "weather_score",
         );
         const total_score =
           hasWeights && ahp_weights
@@ -239,13 +268,13 @@ exports.createNewResult = async (req, res) => {
             weather_score,
           },
         };
-      })
+      }),
     );
 
     scorings.sort((a, b) => b.total_score - a.total_score);
 
     await insertNewResult(
-      2,
+      userId,
       userBudget,
       totalTravelDays,
       user_scenery_requirement,
@@ -253,7 +282,7 @@ exports.createNewResult = async (req, res) => {
       user_weather_preference,
       travel_month,
       weights,
-      scorings[0].place_id
+      scorings[0].place_id,
     );
 
     // await Result.create({

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
 
 
@@ -22,11 +22,12 @@ export function LoginForm({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [url, setUrl] = useState("/")
+
   const navigate = useNavigate();
 
-
-  const handleUserNameChange = (email) => {
-    setUserName(email)
+  const handleUserNameChange = (username) => {
+    setUserName(username)
   }
 
   const handleSetPassword = (pw) => {
@@ -40,15 +41,18 @@ export function LoginForm({
 
     try {
       console.log("running login")
+      const payload = {
+        username, // backend expects `username`
+        password,
+      };
+
+      console.log("Payload sent:", payload);
       const res = await fetch("http://localhost:8080/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          username: username, // backend expects `username`
-          password,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -60,16 +64,28 @@ export function LoginForm({
       localStorage.setItem("token", data.token);
 
       console.log("Login success:", data);
-
-      // 👉 optional: redirect
-      // window.location.href = "/dashboard";
-      navigate("/")
+      navigate(url)
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
-    } 
+    }
   };
+
+  useEffect(() => {
+    if (username.trim().toLowerCase() === "admin") {
+      console.log("aaaaaaaaaaaaaaa")
+      setUrl("/admin")
+    } else {
+      setUrl("/")
+    }
+  }, [username])
+
+  useEffect(() => {
+    console.log(url)
+  }, [url])
+
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -95,14 +111,15 @@ export function LoginForm({
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  {/* <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
-                    Forgot your password?
-                  </a> */}
+
                 </div>
                 <Input id="password" type="password" required onChange={(e) => handleSetPassword(e.target.value)} />
               </div>
+              {error && (
+                <div className="text-sm text-red-500 text-center">
+                  {error}
+                </div>
+              )}
               <Button type="submit" className="w-full" onClick={(e) => handleSubmitForm(e)}>
                 Login
               </Button>

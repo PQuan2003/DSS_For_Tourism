@@ -10,7 +10,7 @@ import Result from './pages/Result/Result'
 import Test from './pages/Test'
 import Login from './pages/Login'
 import SignupPage from './pages/SignUp'
-
+import AdminDashboardPage from './pages/AdminDashboard'
 
 
 function App() {
@@ -24,6 +24,7 @@ function App() {
       <Route path='test' element={<Test />} />
       <Route path='login' element={<Login />} />
       <Route path='signup' element={<SignupPage />} />
+      <Route path='admin' element={<AdminDashboardPage />} />
       <Route path='*' element={<Error />} />
     </Routes>
   )

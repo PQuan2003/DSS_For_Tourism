@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { useLocation, Link, useNavigate } from 'react-router-dom'
 import { getCurrentUser, isLoggedIn, logout } from '@/utils/auth_util'
 
@@ -10,35 +12,34 @@ import {
     NavigationMenuList,
     NavigationMenuTrigger,
     NavigationMenuViewport,
-} from '../ui/navigation-menu'
-import { Button } from '../ui/button'
+} from "@/components/ui/navigation-menu"
+import { Button } from '@/components/ui/button'
 
 import { Moon, Sun } from 'lucide-react'
 import { useState } from 'react'
-import UserDropDown from '../UserDropDown'
+import UserDropDown from '@/components/UserDropDown'
 
 
-export function NavBar({ ...props }) {
+export function AdminNavBar({ ...props }) {
     const navigate = useNavigate()
     const navItems = [
         {
-            title: "Home",
-            url: "/"
+            title: "Dashboard",
+            url: "/admin"
         },
         {
-            title: "Form",
-            url: "/form"
+            title: "Data",
+            url: "/data"
         },
-        {
-            title: "Destination",
-            url: "/destination"
-        },
+
     ]
 
     const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem("token"));
 
     const user = loggedIn ? getCurrentUser() : null
 
+    //hardcode tam:
+    const adminusername = "admin"
 
     const location = useLocation();
     const [isDark, setIsDark] = useState(false)
@@ -63,24 +64,43 @@ export function NavBar({ ...props }) {
 
                             return (
                                 <NavigationMenuLink asChild className='px-4' key={item.title}>
-                                    <Link to={item.url} className='flex'>
-                                        <p className={`text-xl font-bold text-primary-800 ${isActive ? 'underline' : ''}`}>{item.title}</p>
-                                    </Link>
+                                    {item.title === 'Data' ? (
+                                        <span className="flex text-gray-400 cursor-not-allowed px-4">
+                                            <p className="text-xl font-bold">{item.title}</p>
+                                        </span>
+                                    ) : (
+                                        <NavigationMenuLink asChild className="px-4">
+                                            <Link to={item.url} className="flex">
+                                                <p className={`text-xl font-bold text-primary-800 ${isActive ? 'underline' : ''}`}>
+                                                    {item.title}
+                                                </p>
+                                            </Link>
+                                        </NavigationMenuLink>
+                                    )}
                                 </NavigationMenuLink>
                             )
                         })}
                     </div>
                     <div className='flex'>
-                        <Button className='rounded-2xl ml-4' onClick={() => setIsDark(!isDark)}>
-                            {isDark ? <Moon /> : <Sun />}
-                        </Button>
                         {!loggedIn
                             ?
                             <>
-                                <Button className='rounded-2xl ml-1' onClick={() => handleButtonClick("login")}>Login</Button>
-                                <Button className='rounded-2xl ml-1' onClick={() => handleButtonClick("signup")}>Sign Up</Button>
+                                <Button
+                                    variant="ghost"
+                                    className="rounded-xl px-4"
+                                    onClick={() => handleButtonClick("login")}
+                                >
+                                    Login
+                                </Button>
+
+                                <Button
+                                    className="rounded-xl px-4"
+                                    onClick={() => handleButtonClick("signup")}
+                                >
+                                    Sign Up
+                                </Button>
                             </>
-                            : <UserDropDown username={user?.username} setLoggedIn={setLoggedIn} />
+                            : <UserDropDown username={adminusername} setLoggedIn={setLoggedIn} />
                         }
 
                     </div>

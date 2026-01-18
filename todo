@@ -9,13 +9,13 @@ get history (userID)
 
 
 - Report:
-	- bổ sung thesis structure cuối chương 1
+	- bổ sung thesis structure cuối chương 1 ✅
 	- chỉnh lại nội dung chương 2 cho hợp với nội dung thesis
-	- chỉnh lại use case diagram
-	- bỏ pseudo code ra khỏi report
+	- chỉnh lại use case diagram ✅
 - Project:
-	- thiếu option cho time đi
-	- thiếu thu thập user data để phát triển trang tiếp ❓ History để admin coi + thu thập dữ liệu (chưa lm xong auth)
+	- thiếu option cho time đi ✅
+	- thiếu thu thập user data để phát triển trang tiếp ✅ History để admin coi + thu thập dữ liệu (chưa lm xong auth)
 	- thiếu handle không nhập dữ liệu gì trong form hết -> cần để default recommendation sao (nơi popular nhất, vv) ✅ Default hiện nơi dc recommend nhiều nhất, rcm = nhau thì theo alphabet
+
 - Thuyết trình
 	- Cần nói rõ contribution của project là gì

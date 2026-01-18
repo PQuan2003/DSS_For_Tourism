@@ -5,6 +5,7 @@ import useDebound from '@/hooks/useDebound';
 import { BUDGET_MIN, BUDGET_MAX } from '@/constants/constants';
 
 import SearchableMultiSelect from "./SearchableMultiSelect";
+import { getCurrentUser, isLoggedIn } from '@/utils/auth_util';
 
 
 function UserForm() {
@@ -28,6 +29,11 @@ function UserForm() {
     const [scenery, setScenery] = useState([]);
     const [activities, setActivities] = useState([]);
 
+    const [submitError, setSubmitError] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+
+
+
     const [showOptional, setShowOptional] = useState(false);
     const [weights, setWeights] = useState({
         budget: 1,
@@ -39,14 +45,6 @@ function UserForm() {
     const { data: form_data, loading, error } = useFetchData("http://localhost:8080/form");
 
     const handleSetNumericInput = ({ setNumber, value, min, max }) => {
-        // if (min !== undefined && value < min) {
-        //     return setNumber(min);
-        // }
-
-        // if (max !== undefined && value > max) {
-        //     return setNumber(max);
-        // }
-
         setNumber(value);
     };
 
@@ -63,10 +61,29 @@ function UserForm() {
         setWeights((prev) => ({ ...prev, [name]: Number(value) }));
     };
 
+    const isDefaultValue = () => {
+        return (
+            Number(debouncedBudget) === 5000000 &&
+            totalDays === "" &&
+            travelMonth === "" &&
+            scenery.length === 0 &&
+            activities.length === 0 &&
+            avgTemp === "" &&
+            humidity === "" &&
+            weatherType === ""
+        );
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSubmitError("");
+        setSubmitting(true);
+
+        const user = isLoggedIn ? getCurrentUser() : null
+        const userId = user ? user.id : null
 
         const payload = {
+            userId: userId,
             userBudget: Number(debouncedBudget),
             totalTravelDays: Number(totalDays) || null,
             travel_month: travelMonth || null,
@@ -82,14 +99,25 @@ function UserForm() {
 
         console.log("Sending payload:", payload);
 
+        const endpoint = isDefaultValue()
+            ? "http://localhost:8080/results/popular"
+            : "http://localhost:8080/results/new";
+
+        const sent_method = isDefaultValue() ? "GET" : "POST"
+        const sent_body = isDefaultValue() ? null : JSON.stringify(payload)
+
         try {
-            const res = await fetch("http://localhost:8080/results/new", {
-                method: "POST",
+            const res = await fetch(endpoint, {
+                method: sent_method,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
+                body: sent_body,
             });
 
-            if (!res.ok) throw new Error("Failed to submit");
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.content || "Failed to submit preference.");
+            }
+
 
             const data = await res.json();
             console.log("Server response:", data);
@@ -97,8 +125,11 @@ function UserForm() {
             navigate("/result", { state: { response: data } });
         } catch (err) {
             console.error("Error:", err);
-            alert("Failed to submit preference.");
+            setSubmitError(err.message || "Failed to submit preference.");
+        } finally {
+            setSubmitting(false);
         }
+
     };
 
     useEffect(() => {
@@ -306,13 +337,32 @@ function UserForm() {
                 )}
             </div>
 
+            {/* Error */}
+            {submitError && (
+                <div className="text-sm text-red-500 text-center mb-3">
+                    {submitError}
+                </div>
+            )}
+
             {/* Submit Button */}
             <div className="text-center pt-4">
-                <button
+                {/* <button
                     onClick={(e) => handleSubmit(e)}
                     className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200"
                 >
                     Submit Preferences
+                </button> */}
+
+                <button
+                    onClick={(e) => handleSubmit(e)}
+                    disabled={submitting}
+                    className={`px-6 py-2 rounded-lg transition-all duration-200
+                    ${submitting
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-blue-600 hover:bg-blue-700 text-white"
+                        }`}
+                >
+                    {submitting ? "Submitting..." : "Submit Preferences"}
                 </button>
             </div>
         </div>

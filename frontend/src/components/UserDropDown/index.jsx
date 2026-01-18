@@ -19,50 +19,52 @@ import { isLoggedIn, logout } from "@/utils/auth_util"
 
 import { UserRound, UserPen, Wrench, LogOut } from "lucide-react"
 
-export default function UserDropDown({ setLoggedIn }) {
+export default function UserDropDown({ username, setLoggedIn }) {
     const navigate = useNavigate()
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline"><UserRound /></Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full"
+                >
+                    <UserRound className="h-5 w-5" />
+                </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="start">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                        <UserPen /> Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                        <Wrench /> Settings
-                    </DropdownMenuItem>
-                </DropdownMenuGroup>
-                {/* <DropdownMenuSeparator /> */}
-                {/* <DropdownMenuGroup>
-                    <DropdownMenuItem>Team</DropdownMenuItem>
-                    <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>Invite users</DropdownMenuSubTrigger>
-                        <DropdownMenuPortal>
-                            <DropdownMenuSubContent>
-                                <DropdownMenuItem>Email</DropdownMenuItem>
-                                <DropdownMenuItem>Message</DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem>More...</DropdownMenuItem>
-                            </DropdownMenuSubContent>
-                        </DropdownMenuPortal>
-                    </DropdownMenuSub>
-                    <DropdownMenuItem>
-                        New Team
-                        <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
-                    </DropdownMenuItem>
-                </DropdownMenuGroup> */}
+
+            <DropdownMenuContent className="w-56" align="end">
+                <DropdownMenuLabel className="text-sm">
+                    Signed in as
+                    <div className="font-medium">{username}</div>
+                </DropdownMenuLabel>
 
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                    <Button onClick={() => {
-                        // console.log("trying to logout")
-                        logout()
-                        setLoggedIn(isLoggedIn)
-                    }}><LogOut /> Log out</Button>
+
+                <DropdownMenuGroup>
+                    <DropdownMenuItem className="gap-2">
+                        <UserPen className="h-4 w-4" />
+                        Profile
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem className="gap-2">
+                        <Wrench className="h-4 w-4" />
+                        Settings
+                    </DropdownMenuItem>
+                </DropdownMenuGroup>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
+                    className="gap-2 text-red-600 focus:text-red-600"
+                    onClick={() => {
+                        logout();
+                        setLoggedIn(isLoggedIn);
+                        navigate("/");
+                    }}
+                >
+                    <LogOut className="h-4 w-4" />
+                    Log out
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

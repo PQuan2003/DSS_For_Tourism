@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import UserPreferencesSummary from "../../components_old/ResultComp/UserPreferencesSummary";
 import { NavBar } from "@/components/NavigationBar/NavBar";
 import { Search } from "lucide-react";
+import DefaultPreferencesBlock from "./components/DefaultPreferencesBlock"
 
 export default function RecommendationResult() {
     const navigate = useNavigate();
@@ -18,12 +19,15 @@ export default function RecommendationResult() {
     }
 
     const { user_preferences, content } = data;
+    // console.log(content)
     const topPlace = content[0];
 
     const otherPlaces = content.slice(1);
+    console.log("top", topPlace)
+    console.log("other", otherPlaces)
 
     const handleSearchClick = (destination) => {
-        navigate(`/destination?place_name=${destination}`); 
+        navigate(`/destination?place_name=${destination}`);
     };
 
     return (
@@ -35,7 +39,12 @@ export default function RecommendationResult() {
                     Travel Recommendations
                 </h1>
 
-                <UserPreferencesSummary user_preferences={user_preferences} />
+                {/* <UserPreferencesSummary user_preferences={user_preferences} /> */}
+                {user_preferences ? (
+                    <UserPreferencesSummary user_preferences={user_preferences} />
+                ) : (
+                    <DefaultPreferencesBlock />
+                )}
 
                 {/* Top Recommendation */}
                 <div className="flex bg-linear-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-2xl shadow-lg p-6">
@@ -47,29 +56,43 @@ export default function RecommendationResult() {
                             {topPlace.place_name}
                         </h3>
                         <p className="text-gray-600 mb-4">
-                            Total Score:{" "}
-                            <span className="font-semibold text-blue-700">
-                                {topPlace?.total_score?.toFixed(3)}
-                            </span>
+                            {topPlace?.total_score ? (
+                                <>
+                                    Total Score:{" "}
+                                    <span className="font-semibold text-blue-700">
+                                        {topPlace?.total_score?.toFixed(3)}
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    Popularity:{" "}
+                                    <span className="font-semibold text-blue-700">
+                                        {topPlace?.appearance_count?.toFixed(0)}
+                                    </span>
+                                </>
+                            )}
                         </p>
-
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-                            {Object.entries(topPlace?.detailed_scores).map(([key, value]) => (
-                                <div
-                                    key={key}
-                                    className="bg-white rounded-xl shadow-sm p-3 border border-gray-100"
-                                >
-                                    <p className="text-sm font-medium text-gray-500">
-                                        {key.replace("_score", "").replace(/_/g, " ")}
-                                    </p>
-                                    <p className="text-lg font-semibold text-blue-700">
-                                        {value.toFixed(3)}
-                                    </p>
+                        {topPlace?.detailed_scores
+                            ?
+                            <>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                                    {Object.entries(topPlace?.detailed_scores).map(([key, value]) => (
+                                        <div
+                                            key={key}
+                                            className="bg-white rounded-xl shadow-sm p-3 border border-gray-100"
+                                        >
+                                            <p className="text-sm font-medium text-gray-500">
+                                                {key.replace("_score", "").replace(/_/g, " ")}
+                                            </p>
+                                            <p className="text-lg font-semibold text-blue-700">
+                                                {value.toFixed(3)}
+                                            </p>
+                                        </div>
+                                    ))}
                                 </div>
+                            </>
+                            : <></>}
 
-
-                            ))}
-                        </div>
                     </div>
                     <button
                         className="ml-auto mt-auto p-4 flex bg-gray-300"
@@ -92,10 +115,14 @@ export default function RecommendationResult() {
                             >
                                 <div className="flex items-center gap-2">
                                     <span className="font-semibold">{place?.place_name}</span>
-                                    <span className="text-gray-600">(Total: {place?.total_score?.toFixed(3)})</span>
+                                    <span className="text-gray-600">
+                                        {place?.total_score
+                                            ? <>Total: {place?.total_score?.toFixed(3)}</>
+                                            : <>Popularity: {place?.appearance_count?.toFixed(0)}</>}
+                                    </span>
 
                                 </div>
-
+                                {/* 
                                 <div className="flex items-center gap-2 text-xs">
                                     <span className="bg-gray-100 px-2 py-0.5 rounded-md">
                                         B: {place?.detailed_scores?.budget_score?.toFixed(2)}
@@ -109,10 +136,32 @@ export default function RecommendationResult() {
                                     <span className="bg-gray-100 px-2 py-0.5 rounded-md">
                                         W: {place?.detailed_scores?.weather_score?.toFixed(2)}
                                     </span>
-                                </div>
+                                </div> */}
+                                {place?.total_score
+                                    ?
+                                    <>
+                                        <div className="flex items-center gap-2 text-xs">
+                                            <span className="bg-gray-100 px-2 py-0.5 rounded-md">
+                                                B: {place?.detailed_scores?.budget_score?.toFixed(2)}
+                                            </span>
+                                            <span className="bg-gray-100 px-2 py-0.5 rounded-md">
+                                                S: {place?.detailed_scores?.scenery_score?.toFixed(2)}
+                                            </span>
+                                            <span className="bg-gray-100 px-2 py-0.5 rounded-md">
+                                                A: {place?.detailed_scores?.activity_score?.toFixed(2)}
+                                            </span>
+                                            <span className="bg-gray-100 px-2 py-0.5 rounded-md">
+                                                W: {place?.detailed_scores?.weather_score?.toFixed(2)}
+                                            </span>
+                                        </div>
+                                    </>
+                                    : <></>
+                                }
                             </div>
                         ))}
                     </div>
+
+
 
                     <div className="flex justify-center mt-8">
                         <button
