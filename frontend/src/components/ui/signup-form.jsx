@@ -62,7 +62,7 @@ export function SignupForm({ className, ...props }) {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    username: username, 
+                    username: username,
                     password,
                 }),
             });
@@ -158,6 +158,15 @@ export function SignupForm({ className, ...props }) {
                                     >
                                         Sign up
                                     </span>
+                                    <div className="mt-4 text-center text-sm">
+                                        Go back?{" "}
+                                        <span
+                                            onClick={() => navigate("/")}
+                                            className="underline underline-offset-4 cursor-pointer text-primary"
+                                        >
+                                            Homepage
+                                        </span>
+                                    </div>
                                 </FieldDescription>
                             </Field>
                         </FieldGroup>

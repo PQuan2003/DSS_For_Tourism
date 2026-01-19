@@ -10,8 +10,6 @@ import { getCurrentUser, isLoggedIn } from '@/utils/auth_util';
 
 function UserForm() {
     const navigate = useNavigate();
-
-    // Replace `loadingFetch` with `loading` from `useFetchData` hook
     const [availableActivity, setAvailableActivity] = useState([]);
     const [availableTag, setAvailableTag] = useState([]);
 
@@ -134,7 +132,7 @@ function UserForm() {
 
     useEffect(() => {
         if (form_data?.status === "success") {
-            console.log("Initial fetch data: ", form_data)
+            // console.log("Initial fetch data: ", form_data)
             const activityNames = form_data.available_activities.map(activity => activity.activity_name);
             setAvailableActivity(activityNames);
             setAvailableTag(form_data.tags);
@@ -155,7 +153,6 @@ function UserForm() {
         <div className="max-w-2xl mx-auto bg-white shadow-md rounded-2xl p-6 space-y-6">
             <h2 className="text-center text-2xl font-bold">Travel Preference Form</h2>
 
-            {/* Budget Section */}
             <div className="space-y-2">
                 <label className="font-medium text-gray-800">Budget (VND)</label>
 

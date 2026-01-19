@@ -70,19 +70,27 @@ export function NavBar({ ...props }) {
                             )
                         })}
                     </div>
-                    <div className='flex'>
-                        <Button className='rounded-2xl ml-4' onClick={() => setIsDark(!isDark)}>
-                            {isDark ? <Moon /> : <Sun />}
-                        </Button>
+                    <div className='flex mx-2'>
                         {!loggedIn
                             ?
                             <>
-                                <Button className='rounded-2xl ml-1' onClick={() => handleButtonClick("login")}>Login</Button>
-                                <Button className='rounded-2xl ml-1' onClick={() => handleButtonClick("signup")}>Sign Up</Button>
+                                <Button
+                                    variant="ghost"
+                                    className="rounded-xl px-4"
+                                    onClick={() => handleButtonClick("login")}
+                                >
+                                    Login
+                                </Button>
+
+                                <Button
+                                    className="rounded-xl px-4"
+                                    onClick={() => handleButtonClick("signup")}
+                                >
+                                    Sign Up
+                                </Button>
                             </>
                             : <UserDropDown username={user?.username} setLoggedIn={setLoggedIn} />
                         }
-
                     </div>
                 </div>
             </NavigationMenuList>

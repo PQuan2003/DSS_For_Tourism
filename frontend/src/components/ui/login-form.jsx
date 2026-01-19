@@ -81,9 +81,6 @@ export function LoginForm({
     }
   }, [username])
 
-  useEffect(() => {
-    console.log(url)
-  }, [url])
 
 
   return (

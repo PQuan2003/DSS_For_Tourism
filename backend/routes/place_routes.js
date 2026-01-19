@@ -6,6 +6,7 @@ const placeController = require("../controllers/place_controller");
 router.get("/", placeController.getAllPlaces);
 router.get("/filters", placeController.getPlaceFilters);
 router.get("/images", placeController.getPlaceImages);
+router.get("/images/:placeId", placeController.getPlaceImagesByID);
 router.get("/id/:id", placeController.getPlaceById);
 router.get("/name/:place", placeController.getPlaceByName);
 
@@ -13,30 +14,30 @@ router.get("/name/:place", placeController.getPlaceByName);
 router.post("/budget/score/", placeController.calculatedAllPlaceBudgetPoint);
 router.post(
   "/budget/score/:place_id",
-  placeController.calculateIndividualPlaceBudgetScore
+  placeController.calculateIndividualPlaceBudgetScore,
 );
 
 //Scenery Score
 router.post("/scenery/score/", placeController.calculatedAllPlaceSceneryPoint);
 router.post(
   "/scenery/score/:place_id",
-  placeController.calculateIndividualPlaceSceneryScore
+  placeController.calculateIndividualPlaceSceneryScore,
 );
 
 //Activity Score
 router.post(
   "/activity/score/",
-  placeController.calculatedAllPlaceActivityPoint
+  placeController.calculatedAllPlaceActivityPoint,
 );
 router.post(
   "/activity/score/:place_id",
-  placeController.calculateIndividualPlaceActivityScore
+  placeController.calculateIndividualPlaceActivityScore,
 );
 
 router.post("/weather/score/", placeController.calculatedAllPlaceWeatherPoint);
 router.post(
   "/weather/score/:place_id",
-  placeController.calculateIndividualPlaceWeatherScore
+  placeController.calculateIndividualPlaceWeatherScore,
 );
 
 router.post("/new", placeController.createPlace);
@@ -44,6 +45,5 @@ router.post("/new", placeController.createPlace);
 router.patch("/:placeId", placeController.updatePlace);
 
 router.delete("/:id", placeController.deletePlace);
-
 
 module.exports = router;

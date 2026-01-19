@@ -43,14 +43,11 @@ exports.getUserById = async (req, res, next) => {
 exports.createUser = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
-    console.log(username, email, password);
 
     if (!username || !password || !email) {
-      return res
-        .status(400)
-        .json({ error: "Please fill in all fields" });
+      return res.status(400).json({ error: "Please fill in all fields" });
     }
-    
+
     if (!validateUsername(username)) {
       return res.status(400).json({
         error:

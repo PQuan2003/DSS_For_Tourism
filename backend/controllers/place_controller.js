@@ -18,7 +18,7 @@ exports.calculatedAllPlaceBudgetPoint = async (req, res, next) => {
     const scorings = places.map((place) => {
       const { score, totalBudgetNeeded } = place.calculatedBudgetPoint(
         userBudget,
-        totalTravelDays
+        totalTravelDays,
       );
 
       return {
@@ -74,7 +74,7 @@ exports.calculateIndividualPlaceBudgetScore = async (req, res, next) => {
 
     const { score, totalBudgetNeeded } = place.calculatedBudgetPoint(
       userBudget,
-      totalTravelDays
+      totalTravelDays,
     );
 
     // console.log(score, totalBudgetNeeded);
@@ -109,7 +109,7 @@ exports.calculatedAllPlaceSceneryPoint = async (req, res) => {
 
     const scorings = places.map((place) => {
       const score = place.calculatedSceneryPoint(
-        user_preference.user_scenery_requirement
+        user_preference.user_scenery_requirement,
       );
 
       return {
@@ -160,7 +160,7 @@ exports.calculateIndividualPlaceSceneryScore = async (req, res) => {
     }
 
     const score = place.calculatedSceneryPoint(
-      user_preference.user_scenery_requirement
+      user_preference.user_scenery_requirement,
     );
 
     res.json({
@@ -193,7 +193,7 @@ exports.calculatedAllPlaceActivityPoint = async (req, res) => {
       places.map(async (place) => {
         const { score, place_activity_tags } =
           await place.calculatedActivityPoint(
-            user_preference.user_activity_requirement
+            user_preference.user_activity_requirement,
           );
 
         return {
@@ -202,7 +202,7 @@ exports.calculatedAllPlaceActivityPoint = async (req, res) => {
           score,
           place_activity_tags,
         };
-      })
+      }),
     );
 
     scorings.sort((a, b) => b.score - a.score);
@@ -246,7 +246,7 @@ exports.calculateIndividualPlaceActivityScore = async (req, res) => {
     }
 
     const { score, place_activity_tags } = await place.calculatedActivityPoint(
-      user_preference.user_activity_requirement
+      user_preference.user_activity_requirement,
     );
 
     res.json({
@@ -289,7 +289,7 @@ exports.calculatedAllPlaceWeatherPoint = async (req, res) => {
       places.map(async (place) => {
         const { score, weather_data } = await place.calculatedWeatherPoint(
           user_preference.user_weather_preference,
-          user_preference.travel_month
+          user_preference.travel_month,
         );
 
         return {
@@ -298,7 +298,7 @@ exports.calculatedAllPlaceWeatherPoint = async (req, res) => {
           score,
           weather_data,
         };
-      })
+      }),
     );
 
     scorings.sort((a, b) => b.score - a.score);
@@ -353,7 +353,7 @@ exports.calculateIndividualPlaceWeatherScore = async (req, res) => {
 
     const { score, weather_data } = await place.calculatedWeatherPoint(
       user_preference.user_weather_preference,
-      user_preference.travel_month
+      user_preference.travel_month,
     );
 
     res.json({
@@ -427,6 +427,22 @@ const getPlaceImageCollection = async () => {
   }
 };
 
+const getPlaceImgWithPlaceID = async (placeId) => {
+  // console.log(placeId);
+  try {
+    const imgs = await Place.findAll({
+      attributes: ["place_id", "place_img"],
+      where: {
+        place_id: placeId,
+      },
+    });
+
+    return imgs ? imgs : [];
+  } catch (err) {
+    console.error("Error fetching imgs:", err);
+  }
+};
+
 exports.getAllPlaces = async (req, res, next) => {
   try {
     const { country, tags, density, search } = req.query;
@@ -441,7 +457,7 @@ exports.getAllPlaces = async (req, res, next) => {
 
       where[Op.and].push({
         [Op.or]: countryList.map((c) =>
-          Sequelize.literal(`LOWER(country) = '${c}'`)
+          Sequelize.literal(`LOWER(country) = '${c}'`),
         ),
       });
     }
@@ -451,7 +467,7 @@ exports.getAllPlaces = async (req, res, next) => {
 
       where[Op.and].push({
         [Op.or]: tagList.map((tag) =>
-          Sequelize.literal(`JSON_CONTAINS(LOWER(tags), '["${tag}"]')`)
+          Sequelize.literal(`JSON_CONTAINS(LOWER(tags), '["${tag}"]')`),
         ),
       });
     }
@@ -461,7 +477,7 @@ exports.getAllPlaces = async (req, res, next) => {
 
       where[Op.and].push({
         [Op.or]: densityList.map((d) =>
-          Sequelize.literal(`LOWER(tourist_density) = '${d}'`)
+          Sequelize.literal(`LOWER(tourist_density) = '${d}'`),
         ),
       });
     }
@@ -470,7 +486,7 @@ exports.getAllPlaces = async (req, res, next) => {
       where[Op.and].push({
         [Op.or]: [
           Sequelize.literal(
-            `LOWER(place_name) LIKE '%${search.toLowerCase()}%'`
+            `LOWER(place_name) LIKE '%${search.toLowerCase()}%'`,
           ),
         ],
       });
@@ -500,7 +516,7 @@ exports.getPlaceByName = async (req, res) => {
       where: Sequelize.where(
         Sequelize.fn("LOWER", Sequelize.col("place_name")),
         "=",
-        place.toLowerCase()
+        place.toLowerCase(),
       ),
     });
 
@@ -561,6 +577,20 @@ exports.getPlaceFilters = async (req, res) => {
 exports.getPlaceImages = async (req, res) => {
   try {
     const imgs = await getPlaceImageCollection();
+    res.json({
+      status: "success",
+      imgs: imgs,
+    });
+  } catch (error) {
+    console.error("Error in getPlaceImageCollection:", error);
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+exports.getPlaceImagesByID = async (req, res) => {
+  try {
+    const { placeId } = req.params;
+    const imgs = await getPlaceImgWithPlaceID(placeId);
     res.json({
       status: "success",
       imgs: imgs,
@@ -643,7 +673,7 @@ exports.createPlace = async (req, res) => {
       }
 
       const invalidTag = tags.find(
-        (t) => typeof t !== "string" || t.trim() === ""
+        (t) => typeof t !== "string" || t.trim() === "",
       );
 
       if (invalidTag) {
@@ -745,7 +775,7 @@ exports.updatePlace = async (req, res) => {
       }
 
       const invalidTag = tags.find(
-        (t) => typeof t !== "string" || t.trim() === ""
+        (t) => typeof t !== "string" || t.trim() === "",
       );
 
       if (invalidTag) {

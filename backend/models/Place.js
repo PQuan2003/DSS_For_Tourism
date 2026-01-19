@@ -174,7 +174,7 @@ module.exports = (sequelize, DataTypes) => {
 
       if (score > 1) score = 1;
 
-      console.log("final return", score, typeof allActivityNames);
+      // console.log("final return", score, typeof allActivityNames);
       return {
         score: Number(score.toFixed(2)),
         place_activity_tags: allActivityNames,

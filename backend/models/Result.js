@@ -16,43 +16,6 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
-  // Result.init(
-  //   {
-  //     result_id: {
-  //       type: DataTypes.INTEGER,
-  //       primaryKey: true,
-  //       autoIncrement: true,
-  //     },
-  //     top_location: {
-  //       type: DataTypes.STRING,
-  //       allowNull: false,
-  //     },
-  //     user_id: {
-  //       type: DataTypes.INTEGER,
-  //       allowNull: true,
-  //     },
-  //     preferences: {
-  //       type: DataTypes.JSON,
-  //       allowNull: false,
-
-  //       get() {
-  //         const raw = this.getDataValue("preferences");
-  //         return raw ?? {};
-  //       },
-
-  //       set(value) {
-  //         this.setDataValue("preferences", value);
-  //       },
-  //     },
-  //   },
-  //   {
-  //     sequelize,
-  //     modelName: "Result",
-  //     tableName: "Results",
-  //     timestamps: true,
-  //   }
-  // );
-
   Result.init(
     {
       result_id: {
@@ -91,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "Result",
       tableName: "Results",
       timestamps: true,
-    }
+    },
   );
 
   return Result;

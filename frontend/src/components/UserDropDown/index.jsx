@@ -27,7 +27,7 @@ export default function UserDropDown({ username, setLoggedIn }) {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="rounded-full"
+                    className="rounded-full border-2 border-black"
                 >
                     <UserRound className="h-5 w-5" />
                 </Button>

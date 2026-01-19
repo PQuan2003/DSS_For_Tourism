@@ -4,27 +4,33 @@ import UserPreferencesSummary from "../../components_old/ResultComp/UserPreferen
 import { NavBar } from "@/components/NavigationBar/NavBar";
 import { Search } from "lucide-react";
 import DefaultPreferencesBlock from "./components/DefaultPreferencesBlock"
+import useFetchData from '@/hooks/useFetchData';
 
 export default function RecommendationResult() {
     const navigate = useNavigate();
     const location = useLocation();
 
 
-    // Get the data passed from the form page``
+
     const data = location.state?.response;
-    console.log("Received data:\n", data)
+
 
     if (!data || !data.content) {
         return <p className="text-center text-gray-500">No results found.</p>;
     }
 
     const { user_preferences, content } = data;
-    // console.log(content)
+
     const topPlace = content[0];
+    const { data: top_place_img, loading, error } = useFetchData(
+        topPlace?.place_id
+            ? `http://localhost:8080/places/images/${topPlace.place_id}`
+            : null
+    );
+    const imageUrl = top_place_img?.imgs?.[0]?.place_img;
+
 
     const otherPlaces = content.slice(1);
-    console.log("top", topPlace)
-    console.log("other", otherPlaces)
 
     const handleSearchClick = (destination) => {
         navigate(`/destination?place_name=${destination}`);
@@ -47,122 +53,141 @@ export default function RecommendationResult() {
                 )}
 
                 {/* Top Recommendation */}
-                <div className="flex bg-linear-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-2xl shadow-lg p-6">
-                    <div>
-                        <h2 className="text-xl font-semibold text-blue-800 mb-2">
-                            🌟 Top Recommendation
-                        </h2>
-                        <h3 className="text-2xl font-bold text-gray-800">
-                            {topPlace.place_name}
-                        </h3>
-                        <p className="text-gray-600 mb-4">
-                            {topPlace?.total_score ? (
-                                <>
-                                    Total Score:{" "}
-                                    <span className="font-semibold text-blue-700">
-                                        {topPlace?.total_score?.toFixed(3)}
-                                    </span>
-                                </>
-                            ) : (
-                                <>
-                                    Popularity:{" "}
-                                    <span className="font-semibold text-blue-700">
-                                        {topPlace?.appearance_count?.toFixed(0)}
-                                    </span>
-                                </>
-                            )}
-                        </p>
-                        {topPlace?.detailed_scores
-                            ?
-                            <>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-                                    {Object.entries(topPlace?.detailed_scores).map(([key, value]) => (
-                                        <div
-                                            key={key}
-                                            className="bg-white rounded-xl shadow-sm p-3 border border-gray-100"
-                                        >
-                                            <p className="text-sm font-medium text-gray-500">
-                                                {key.replace("_score", "").replace(/_/g, " ")}
-                                            </p>
-                                            <p className="text-lg font-semibold text-blue-700">
-                                                {value.toFixed(3)}
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </>
-                            : <></>}
+                <div
+                    className="relative flex border border-blue-200 rounded-2xl shadow-lg overflow-hidden"
+                    style={{
+                        backgroundImage: imageUrl ? `url(${imageUrl})` : "none",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                    }}
+                >
+                    {/* Overlay */}
+                    <div className="absolute inset-0 bg-black/45 backdrop-blur-[2px]" />
 
+                    {/* Content */}
+                    <div className="relative flex w-full p-6">
+                        <div>
+                            <h2 className="text-xl font-semibold text-yellow-300 mb-2">
+                                Top Recommendation
+                            </h2>
+
+                            <h3 className="text-2xl font-bold text-white drop-shadow">
+                                {topPlace.place_name}
+                            </h3>
+
+                            {topPlace?.detailed_scores ?
+                                <>
+                                    <p className="text-gray-200 mb-4">
+                                        Total Score:{" "}
+                                        <span className="font-semibold text-yellow-300">
+                                            {topPlace?.total_score?.toFixed(3)}
+                                        </span>
+                                    </p>
+                                </>
+                                : <>
+                                    <p className="text-gray-200 mb-4">Popularity:{" "}
+                                        <span className="font-medium text-yellow-300">
+                                            {topPlace?.appearance_count?.toFixed(0)}
+                                        </span>
+                                    </p>
+                                </>}
+
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                                {
+                                    topPlace?.detailed_scores
+                                        ?
+                                        Object.entries(topPlace?.detailed_scores).map(([key, value]) => (
+                                            <div
+                                                key={key}
+                                                className="bg-white/90 rounded-xl shadow-sm p-3"
+                                            >
+                                                <p className="text-sm font-medium text-gray-600">
+                                                    {key
+                                                        .replace("_score", "")
+                                                        .replace(/_/g, " ")
+                                                        .replace(/^\w/, (c) => c.toUpperCase())}
+                                                </p>
+
+                                                <p className="text-lg font-semibold text-blue-700">
+                                                    {value.toFixed(3)}
+                                                </p>
+                                            </div>
+                                        ))
+                                        : null
+                                }
+                            </div>
+                        </div>
+
+                        <button
+                            className="ml-auto mt-auto p-4 flex items-center gap-2 bg-white/90 hover:bg-white rounded-xl shadow"
+                            onClick={() => handleSearchClick(topPlace.place_name)}
+                        >
+                            <Search />
+                            <p className="font-medium">More info</p>
+                        </button>
                     </div>
-                    <button
-                        className="ml-auto mt-auto p-4 flex bg-gray-300"
-                        onClick={() => handleSearchClick(topPlace.place_name)}>
-                        <Search className="mx-2" />
-                        <p>More info</p>
-                    </button>
                 </div>
+
 
                 {/* Other Matches Section */}
                 <div className="mt-8">
-                    <h2 className="text-xl font-semibold mb-3">Other Matches</h2>
+                    <h2 className="text-xl font-semibold mb-4 text-blue-800">
+                        Other Matches
+                    </h2>
 
-                    {/* Scrollable container with height limit */}
-                    <div className="max-h-56 overflow-y-auto space-y-1 pr-1">
+                    {/* Scrollable container */}
+                    <div className="max-h-56 overflow-y-auto space-y-3 pr-1">
                         {otherPlaces.map((place, index) => (
                             <div
                                 key={index}
-                                className="flex items-center justify-between p-2 rounded-lg border shadow-sm hover:bg-gray-50 transition text-sm"
+                                className="flex items-center justify-between p-4 rounded-xl border border-blue-100 bg-white shadow-sm hover:shadow-md hover:bg-blue-50/50 transition"
                             >
-                                <div className="flex items-center gap-2">
-                                    <span className="font-semibold">{place?.place_name}</span>
-                                    <span className="text-gray-600">
-                                        {place?.total_score
-                                            ? <>Total: {place?.total_score?.toFixed(3)}</>
-                                            : <>Popularity: {place?.appearance_count?.toFixed(0)}</>}
-                                    </span>
-
+                                {/* Left */}
+                                <div>
+                                    <p className="font-semibold text-gray-800">
+                                        {place?.place_name}
+                                    </p>
+                                    <p className="text-sm text-gray-600">
+                                        {place?.total_score ? (
+                                            <>
+                                                Total Score:{" "}
+                                                <span className="font-medium text-blue-700">
+                                                    {place?.total_score?.toFixed(3)}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                Popularity:{" "}
+                                                <span className="font-medium text-blue-700">
+                                                    {place?.appearance_count?.toFixed(0)}
+                                                </span>
+                                            </>
+                                        )}
+                                    </p>
                                 </div>
-                                {/* 
-                                <div className="flex items-center gap-2 text-xs">
-                                    <span className="bg-gray-100 px-2 py-0.5 rounded-md">
-                                        B: {place?.detailed_scores?.budget_score?.toFixed(2)}
-                                    </span>
-                                    <span className="bg-gray-100 px-2 py-0.5 rounded-md">
-                                        S: {place?.detailed_scores?.scenery_score?.toFixed(2)}
-                                    </span>
-                                    <span className="bg-gray-100 px-2 py-0.5 rounded-md">
-                                        A: {place?.detailed_scores?.activity_score?.toFixed(2)}
-                                    </span>
-                                    <span className="bg-gray-100 px-2 py-0.5 rounded-md">
-                                        W: {place?.detailed_scores?.weather_score?.toFixed(2)}
-                                    </span>
-                                </div> */}
-                                {place?.total_score
-                                    ?
-                                    <>
-                                        <div className="flex items-center gap-2 text-xs">
-                                            <span className="bg-gray-100 px-2 py-0.5 rounded-md">
-                                                B: {place?.detailed_scores?.budget_score?.toFixed(2)}
-                                            </span>
-                                            <span className="bg-gray-100 px-2 py-0.5 rounded-md">
-                                                S: {place?.detailed_scores?.scenery_score?.toFixed(2)}
-                                            </span>
-                                            <span className="bg-gray-100 px-2 py-0.5 rounded-md">
-                                                A: {place?.detailed_scores?.activity_score?.toFixed(2)}
-                                            </span>
-                                            <span className="bg-gray-100 px-2 py-0.5 rounded-md">
-                                                W: {place?.detailed_scores?.weather_score?.toFixed(2)}
-                                            </span>
-                                        </div>
-                                    </>
-                                    : <></>
-                                }
+
+                                {/* Scores */}
+                                {place?.total_score && (
+                                    <div className="flex items-center gap-2 text-xs">
+                                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-medium">
+                                            Budget {place?.detailed_scores?.budget_score?.toFixed(2)}
+                                        </span>
+                                        <span className="bg-green-100 text-green-700 px-2 py-1 rounded-lg font-medium">
+                                            Scenery {place?.detailed_scores?.scenery_score?.toFixed(2)}
+                                        </span>
+                                        <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-lg font-medium">
+                                            Activity {place?.detailed_scores?.activity_score?.toFixed(2)}
+                                        </span>
+                                        <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-lg font-medium">
+                                            Weather {place?.detailed_scores?.weather_score?.toFixed(2)}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
 
-
-
+                    {/* Back button */}
                     <div className="flex justify-center mt-8">
                         <button
                             onClick={() => navigate("/form")}
@@ -172,6 +197,9 @@ export default function RecommendationResult() {
                         </button>
                     </div>
                 </div>
+
+
+
             </div>
         </div>
     );

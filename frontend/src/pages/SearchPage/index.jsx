@@ -212,7 +212,7 @@ function Destination() {
     }, [selectedPlaceData])
 
     // Handle loading, error, and empty state
-    if (isLoading) return <div>Loading...</div>;
+    // if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error: {error.message}</div>;
     if (!placeData) return <div>No data available</div>;
 
@@ -340,7 +340,12 @@ function Destination() {
                         </div>
                     </div>
                 </div>
-                {isLoading && <>Fetching Places....</>}
+                {isLoading && (
+                    <div className="text-center py-6 text-gray-500">
+                        Fetching places...
+                    </div>
+                )}
+
                 {!isLoading && (
                     <GridLayout items={placeData.content} onCardClick={handleCardClick} />
                 )}

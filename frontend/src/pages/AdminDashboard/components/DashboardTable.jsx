@@ -13,13 +13,12 @@ import useFetchData from '@/hooks/useFetchData';
 
 
 const DashboardTable = ({ type }) => {
-    console.log("Type in dbt:", type)
     const baseUrl = "http://localhost:8080/results";
     const url =
         type === "today"
             ? `${baseUrl}/today`
             : baseUrl;
-    console.log(url)
+    // console.log(url)
     const { data: history_data, loading, error } = useFetchData(url);
 
     const table_data = history_data?.content
@@ -29,6 +28,17 @@ const DashboardTable = ({ type }) => {
         value === null || value === undefined || value === ""
             ? fallback
             : value;
+
+    const formatUTCToVNDate = (utcDateString) => {
+        if (!utcDateString) return "N/A";
+
+        return new Date(utcDateString).toLocaleDateString("vi-VN", {
+            timeZone: "Asia/Ho_Chi_Minh",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+        });
+    };
 
     return (
         <Table>
@@ -120,10 +130,9 @@ const DashboardTable = ({ type }) => {
                         </TableCell>
 
                         <TableCell className="text-right">
-                            {row?.createdAt
-                                ? new Date(row.createdAt).toLocaleDateString()
-                                : "N/A"}
+                            {formatUTCToVNDate(row?.createdAt)}
                         </TableCell>
+
                     </TableRow>
                 ))}
             </TableBody>
