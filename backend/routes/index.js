@@ -11,7 +11,6 @@ router.get("/", (req, res) => {
  */
 router.use("/auth", require("./auth_route"));
 router.use("/users", require("./user_routes"));
-// router.use("/user_preferences", require("./user_preference_routes"));
 
 /**
  * Core Resources

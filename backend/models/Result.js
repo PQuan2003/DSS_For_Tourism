@@ -4,15 +4,12 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Result extends Model {
     static associate(models) {
-      // Result.belongsTo(models.User_Preference, { foreignKey: "preference_id" });
-      // Result.belongsTo(models.Preference_Group, {
-      //   foreignKey: "preference_group_id",
-      // });
+
       Result.belongsTo(models.User, { foreignKey: "user_id" });
       Result.belongsTo(models.Place, {
         foreignKey: "place_id",
       });
-      // Result.hasMany(models.Result_Location, { foreignKey: "result_id" });
+     
     }
   }
 

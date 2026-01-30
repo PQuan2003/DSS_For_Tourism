@@ -132,7 +132,7 @@ function UserForm() {
 
     useEffect(() => {
         if (form_data?.status === "success") {
-            // console.log("Initial fetch data: ", form_data)
+            // console.log("Initial fetch data: ", form_data)`
             const activityNames = form_data.available_activities.map(activity => activity.activity_name);
             setAvailableActivity(activityNames);
             setAvailableTag(form_data.tags);

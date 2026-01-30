@@ -5,7 +5,6 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Activity extends Model {
     static associate(models) {
-      // An activity can be linked to many POIs through POI_Activities
       Activity.hasMany(models.POI_Activity, { foreignKey: "activity_id" });
     }
   }

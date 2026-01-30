@@ -2,7 +2,6 @@ const { Result, Place, User } = require("../models");
 const { handleCalculateAHP } = require("../utils/handleCalculateAHP");
 const { validate_number } = require("../utils/validate_number");
 const { Op, fn, col, literal } = require("sequelize");
-// const { insertNewPreferenceGroup } = require("./preference_group_controller");
 
 const insertNewResult = async (
   userId,
@@ -284,12 +283,6 @@ exports.createNewResult = async (req, res) => {
       weights,
       scorings[0].place_id,
     );
-
-    // await Result.create({
-    //   user_id: 1,
-    //   preference_group_id: preferenceGroup.group_id,
-    //   top_place_name: scorings[0].place_name,
-    // });
 
     res.json({
       status: "success",

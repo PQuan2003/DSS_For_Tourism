@@ -15,7 +15,6 @@ const GridLayout = ({ items, onCardClick }) => {
         <div className="w-full overflow-auto">
             {numberOfItems === 0 && <div className='justify-center items-center'>No item to display</div>}
             {numberOfItems !== 0 && (
-                // <div className={`grid grid-cols-${grid_col} gap-0 items-center mx-6 justify-center`}>
                 <div className="grid gap-10 grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] px-10 pb-10">
                     {items?.map((place) => (
                         <Card
@@ -23,7 +22,6 @@ const GridLayout = ({ items, onCardClick }) => {
                             className="max-w-xs w-full mx-auto bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-2xl"
                             onClick={() => onCardClick(place.place_name)}
                         >
-                            {/* Image with responsive fit and rounded corners */}
                             <div className="w-full h-48 relative">
                                 <img
                                     src={place.place_img}

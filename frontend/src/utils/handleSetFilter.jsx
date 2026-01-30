@@ -18,7 +18,7 @@ const handleSetFilter = (params) => {
     ) {
         filteredColumn.forEach((column, index) => {
             const value = filteredValue[index];
-            newFilters[column] = [value]; // Add to filters object
+            newFilters[column] = [value];
         });
     }
     return newFilters;

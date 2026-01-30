@@ -6,8 +6,5 @@ const POIController = require("../controllers/poi_controller");
 router.get("/", POIController.getAllPOI);
 router.get("/id/:id", POIController.getPOIById);
 
-// router.post("/", POIController.createPlace);
-// router.put("/:id", POIController.updatePlace);
-// router.delete("/:id", POIController.deletePlace);
 
 module.exports = router;

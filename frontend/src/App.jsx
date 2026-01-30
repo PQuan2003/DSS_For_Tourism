@@ -1,7 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
-
-//for now
 import Form from './pages/Form'
 import Destination from './pages/SearchPage'
 import Error from './pages/Not_Found/Not_Found_Page'

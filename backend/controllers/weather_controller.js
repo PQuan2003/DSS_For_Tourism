@@ -1,7 +1,6 @@
 const { where } = require("sequelize");
 const { Weather_Conditions } = require("../models");
 
-// Get all weathers
 exports.getAllWeather = async (req, res, next) => {
   try {
     const weathers = await Weather_Conditions.findAll();
@@ -20,7 +19,6 @@ exports.getAllWeather = async (req, res, next) => {
   }
 };
 
-// Get weather by ID
 exports.getWeatherByID = async (req, res, next) => {
   try {
     const weather = await Weather_Conditions.findByPk(req.params.id);

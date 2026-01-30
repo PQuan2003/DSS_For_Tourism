@@ -68,7 +68,7 @@ exports.handleCalculateAHP = (weights) => {
   // console.log("Result of 1st:", matrix, keys);
 
   const normalized_matrix = normalizingMatrix(matrix);
-  // console.log(normalized_matrix);
+  console.log(normalized_matrix);
 
   const AHP_weight = calculatedAHPWeight(keys, normalized_matrix);
 

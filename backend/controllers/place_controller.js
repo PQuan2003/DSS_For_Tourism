@@ -9,7 +9,6 @@ exports.calculatedAllPlaceBudgetPoint = async (req, res, next) => {
   try {
     let { userBudget, totalTravelDays } = req.body;
 
-    // Handle missing parameters
     userBudget = Number(userBudget) || 0;
     totalTravelDays = Number(totalTravelDays) || 0;
 
@@ -58,11 +57,9 @@ exports.calculateIndividualPlaceBudgetScore = async (req, res, next) => {
 
     let { userBudget, totalTravelDays } = req.body;
 
-    // handle missing parameters
     userBudget = Number(userBudget) || 0;
     totalTravelDays = Number(totalTravelDays) || 0;
 
-    // Find place by ID
     const place = await Place.findByPk(place_id);
 
     if (!place) {
@@ -446,10 +443,9 @@ const getPlaceImgWithPlaceID = async (placeId) => {
 exports.getAllPlaces = async (req, res, next) => {
   try {
     const { country, tags, density, search } = req.query;
-    // console.log("DENSITYYYYYYY", density);
 
     const where = {
-      [Op.and]: [], // this will collect all groups
+      [Op.and]: [],
     };
 
     if (country) {
@@ -530,9 +526,7 @@ exports.getPlaceByName = async (req, res) => {
 
     const poi_data = await getPOIByPlaceId(result.place_id);
 
-    //TODO chỉnh lại cái này
     return res.status(200).json({
-      // status: "success",
       place: result,
       availableHotel: hotels,
       weather_data: weather_data,

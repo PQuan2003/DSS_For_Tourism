@@ -8,16 +8,12 @@ exports.getHotelByPlaceId = async (placeId) => {
       }
     })
 
-    // if (!hotels) return []
-
     return hotels ? hotels : []
   } catch (err) {
     console.log("Error fetching hotels")
   }
 }
 
-
-// Get all users
 exports.getAllHotels = async (req, res, next) => {
   try {
     const hotels = await Hotel.findAll();
@@ -36,7 +32,6 @@ exports.getAllHotels = async (req, res, next) => {
   }
 };
 
-// Get user by ID
 exports.getHotelById = async (req, res, next) => {
   try {
     const hotel = await Hotel.findByPk(req.params.id);

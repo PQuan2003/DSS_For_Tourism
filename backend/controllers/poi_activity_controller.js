@@ -18,7 +18,6 @@ exports.getAllPOIActivity = async (req, res, next) => {
   }
 };
 
-// Get user by ID
 exports.getPOIActivityById = async (req, res, next) => {
   try {
     const poi_activities = await POI_Activity.findByPk(req.params.id);

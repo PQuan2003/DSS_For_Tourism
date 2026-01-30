@@ -1,7 +1,6 @@
 const { where } = require("sequelize");
 const { POI, POI_Activity, Activity } = require("../models");
 
-// Get all users
 exports.getAllPOI = async (req, res, next) => {
   try {
     const poi = await POI.findAll();
@@ -20,7 +19,6 @@ exports.getAllPOI = async (req, res, next) => {
   }
 };
 
-// Get user by ID
 exports.getPOIById = async (req, res, next) => {
   try {
     const poi = await POI.findByPk(req.params.id);

@@ -29,14 +29,11 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Create JWT
     const token = jwt.sign(
       { id: user.id, username: user.username },
       process.env.JWT_SECRET,
       { expiresIn: "6h" }
     );
-
-   
 
     res.json({
       message: "Login successful",

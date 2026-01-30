@@ -111,7 +111,6 @@ function Destination() {
         // Add event listener
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
-            // Clean up event listener
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
@@ -119,8 +118,8 @@ function Destination() {
     const handleSelectionChange = (setter) => (value) => {
         setter((prevState) =>
             prevState.includes(value)
-                ? prevState.filter((item) => item !== value) // Deselect
-                : [...prevState, value] // Select
+                ? prevState.filter((item) => item !== value)
+                : [...prevState, value]
         );
     };
 
@@ -158,7 +157,6 @@ function Destination() {
                 const params = new URLSearchParams
                 if (selectedFilters) {
                     if (selectedFilters.country?.length > 0) {
-                        // single or multiple countries → join with comma
                         params.append("country", selectedFilters.country.join(","));
                     }
 
@@ -168,7 +166,6 @@ function Destination() {
 
                     if (selectedFilters.tourist_density?.length > 0) {
                         params.append("density", selectedFilters.tourist_density.join(","));
-                        // adjust the key based on your API ("density" in your sample)
                     }
                 }
                 if (debouncedSearch) {
@@ -211,8 +208,6 @@ function Destination() {
         setIsOpen(selectedPlaceData ? true : false)
     }, [selectedPlaceData])
 
-    // Handle loading, error, and empty state
-    // if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error: {error.message}</div>;
     if (!placeData) return <div>No data available</div>;
 

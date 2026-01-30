@@ -10,7 +10,6 @@ const validatePassword = (password) => {
   return passwordRegex.test(password);
 };
 
-// Get all users
 exports.getAllUsers = async (req, res, next) => {
   try {
     const users = await User.findAll();
@@ -29,7 +28,6 @@ exports.getAllUsers = async (req, res, next) => {
   }
 };
 
-// Get user by ID
 exports.getUserById = async (req, res, next) => {
   try {
     const user = await User.findByPk(req.params.id);
@@ -79,7 +77,6 @@ exports.createUser = async (req, res, next) => {
   }
 };
 
-// Update user
 exports.updateUser = async (req, res, next) => {
   try {
     const [updated] = await User.update(req.body, {
@@ -94,7 +91,7 @@ exports.updateUser = async (req, res, next) => {
   }
 };
 
-// Delete user
+
 exports.deleteUser = async (req, res, next) => {
   try {
     const deleted = await User.destroy({

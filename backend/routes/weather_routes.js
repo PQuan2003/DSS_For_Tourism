@@ -6,8 +6,5 @@ const weatherController = require("../controllers/weather_controller");
 router.get("/", weatherController.getAllWeather);
 router.get("/:id", weatherController.getWeatherByID);
 
-// router.post("/", weatherController.createUser);
-// router.put("/:id", weatherController.updateUser);
-// router.delete("/:id", weatherController.deleteUser);
 
 module.exports = router;

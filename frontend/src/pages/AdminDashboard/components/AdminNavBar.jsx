@@ -38,7 +38,6 @@ export function AdminNavBar({ ...props }) {
 
     const user = loggedIn ? getCurrentUser() : null
 
-    //hardcode tam:
     const adminusername = "admin"
 
     const location = useLocation();

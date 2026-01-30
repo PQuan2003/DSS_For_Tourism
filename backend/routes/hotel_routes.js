@@ -6,8 +6,5 @@ const hotelController = require("../controllers/hotel_controller");
 router.get("/", hotelController.getAllHotels);
 router.get("/:id", hotelController.getHotelById);
 
-// router.post("/", hotelController.createPlace);
-// router.put("/:id", hotelController.updatePlace);
-// router.delete("/:id", hotelController.deletePlace);
 
 module.exports = router;
